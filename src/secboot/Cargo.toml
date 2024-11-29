@@ -1,7 +1,0 @@
-[package]
-name = "secboot"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-memseclib = { path = "../memseclib" }

@@ -86,14 +86,18 @@ cargodump:
 # Programm Device #
 ###################
 
+# Configure the target system security features
 enable_security:
 	${FLASHER} ${CONNECT} ${SECURE_ENABLE};
 	${FLASHER} ${CONNECT} ${OPTION_BYTES}
 
+# Program the system using the flasher (i.e. the flat binary)
 program_target: enable_security
 	${FLASHER} ${CONNECT} ${LOAD} $(BINPATH)/$(PROJECT).bin ${TARAGET_FLASH_START}
 
-program_elf:
+# Program the system using GDB (i.e. the ELF file)
+# A backend (such as openocd) must be opened before doing this
+program_elf: 
 	$(GDB) $(BINPATH)/$(PROJECT) \
 	-ex 'target extended-remote:3333' \
 	-ex 'b ${ENTRY_POINY}' \

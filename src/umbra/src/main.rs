@@ -24,12 +24,13 @@ pub mod non_secure;
 pub mod non_secure_callable;
 
 // Crates
-// use secboot::*;
+use arm::sau;
 
 #[no_mangle]
 #[allow(dead_code)]
 #[allow(unreachable_code)]
 #[allow(unused_assignments)]
+
 pub unsafe fn main() -> !{
 
     //////////////////////////////////////////////////
@@ -55,14 +56,11 @@ pub unsafe fn main() -> !{
     let sau_rbar = sau_ptr.wrapping_add(3);
     let sau_rlar = sau_ptr.wrapping_add(4);
 
-    // First, since enable bits for SAU regions are undefined at reset, we must clear them explicitly
-    let region_num : u8 = *(sau_type) as u8;
-    for i in 0..region_num {
-        // First, select the region
-        *(sau_region) = i as u32;
-        // Let's clear the region enable bit
-        *(sau_rlar) &= 0xfffffffe;
-    }
+    // Initialize the SAU
+
+    let mut sau_descriptor : sau::SauDriver = sau::SauDriver::new();
+
+    sau_descriptor.init();
 
     // By default non-defined regions are SECURE, therefore we must define the Non-secure region
     let base_addr : u32 = 0x08040000;
