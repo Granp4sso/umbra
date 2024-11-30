@@ -4,7 +4,8 @@
 
 // Using Rust Naming conventions https://rust-lang.github.io/api-guidelines/naming.html
 
-use core::ptr;
+// Crates
+use peripheral_regs::*;
 
 //////////////////////////////////////////////////
 //    ___                 _      _              //
@@ -123,122 +124,20 @@ impl SauDriver {
         Self { regs }
     }
 
-    // Register operations
-    pub unsafe fn read_register(&self, reg_offset: u32) -> u32 {
-        let regs_base_address = self.regs as *const SauRegisters as u32;
-        let value = ptr::read_volatile((regs_base_address + reg_offset) as *const u32);
-        return value;
-    }
-
-    pub unsafe fn write_register(&mut self, reg_offset: u32, value: u32) {
-        let regs_base_address = self.regs as *const SauRegisters as u32;
-        ptr::write_volatile((regs_base_address + reg_offset) as *mut u32, value);
-    }
-    
-    pub unsafe fn set_register_bit(&mut self, reg_offset: u32, bit: u8) {
-        let reg_val = self.read_register(reg_offset);
-        self.write_register(reg_offset, reg_val | (1 << bit));
-    }
-    
-    pub unsafe fn clear_register_bit(&mut self, reg_offset: u32, bit: u8) {
-        let reg_val = self.read_register(reg_offset);
-        self.write_register(reg_offset, reg_val & !(1 << bit));
-    }
-
-    pub unsafe fn set_register_field(&mut self, reg_offset: u32, val: u16, mask: u32) {
-
-        let field_size = val >> 8;
-        let field_start = val & 0x00ff;
-
-        for field_cnt in 0..field_size {
-            if ((mask >> field_cnt) & 0x1) == 1 {
-                let curr_bit = (field_start + field_cnt) as u8;
-                self.set_register_bit(reg_offset, curr_bit);
-            }
-        }
-    }
-
-    pub unsafe fn clear_register_field(&mut self, reg_offset: u32, val: u16, mask: u32) {
-        
-        let field_size = val >> 8;
-        let field_start = val & 0x00ff;
-
-        for field_cnt in 0..field_size {
-            if ((mask >> field_cnt) & 0x1) == 1 {
-                let curr_bit = (field_start + field_cnt) as u8;
-                self.clear_register_bit(reg_offset, curr_bit);
-            }
-        }
-    }
-
-    // Driver Operations
     pub unsafe fn init(&mut self) {
         // By default, SAU regions are undefined at reset, we must clear them explicitly
-        let region_num : u8 = self.read_register(SAU_TYPE_REG) as u8;
+        let regs_base_address = self.regs as *const SauRegisters as *const u32;
+        let region_num : u8 = read_register(regs_base_address, SAU_TYPE_REG) as u8;
+
         for i in 0..region_num {
             // First, select the region
-            self.write_register(SAU_RNR_REG, i as u32);
+            write_register(regs_base_address, SAU_RNR_REG, i as u32);
             // Let's clear the region enable bit
-            self.clear_register_field(SAU_RLAR_REG, SAU_RLAR_ENABLE_FIELD, 0xffffffff);
+            clear_register_field(regs_base_address, SAU_RLAR_REG, SAU_RLAR_ENABLE_FIELD, 0x1);
         }
-        self.write_register(SAU_RNR_REG, 0 as u32);
+        write_register(regs_base_address, SAU_RNR_REG, 0 as u32);
     }
 
-    /*
-    /// Initializes the peripheral with a given configuration
-    ///
-    /// # Arguments
-    /// * `config` - A PeripheralConfig enum specifying the mode of operation
-    pub fn initialize(&mut self, config: PeripheralConfig) {
-        // Configure the peripheral based on the provided mode
-        match config {
-            PeripheralConfig::Mode1 => {
-                self.regs.reg1 = 0x01;
-                self.regs.reg2 = 0x02;
-            }
-            PeripheralConfig::Mode2 => {
-                self.regs.reg1 = 0x10;
-                self.regs.reg2 = 0x20;
-            }
-        }
-        
-        // Example of an optional delay (for hardware setup timing, if needed)
-        self.delay(100);
-    }
-
-    /// Writes a value to a specific register
-    pub fn write_register(&mut self, reg_offset: u32, value: u32) {
-        unsafe { ptr::write_volatile((PERIPHERAL_BASE + reg_offset) as *mut u32, value) };
-    }
-
-    /// Set a specific bit in a register
-    pub fn set_bit(&mut self, reg_offset: u32, bit: u8) {
-        let reg_val = self.read_register(reg_offset);
-        self.write_register(reg_offset, reg_val | (1 << bit));
-    }
-
-    /// Clear a specific bit in a register
-    pub fn clear_bit(&mut self, reg_offset: u32, bit: u8) {
-        let reg_val = self.read_register(reg_offset);
-        self.write_register(reg_offset, reg_val & !(1 << bit));
-    }
-
-    /// Example method to perform a peripheral-specific operation
-    pub fn do_something(&mut self) {
-        // Example: Toggle a bit in register 1
-        self.set_bit(REGISTER_1_OFFSET, 3);
-    }
-
-    /// Optional internal delay function (simple busy-wait)
-    ///
-    /// This delay function introduces a basic busy-wait loop for small delays
-    fn delay(&self, cycles: u32) {
-        for _ in 0..cycles {
-            // Busy-wait to simulate a delay (NOP)
-            core::sync::atomic::compiler_fence(core::sync::atomic::Ordering::SeqCst);
-        }
-    }
-    */
 }
 
 

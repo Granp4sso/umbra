@@ -3,12 +3,5 @@
 version = 3
 
 [[package]]
-name = "arm"
-version = "0.1.0"
-dependencies = [
- "peripheral_regs",
-]
-
-[[package]]
 name = "peripheral_regs"
 version = "0.1.0"
