@@ -25,6 +25,7 @@ pub mod non_secure_callable;
 
 // Crates
 use arm::sau;
+use stm32l552::gtzc;
 
 #[no_mangle]
 #[allow(dead_code)]
@@ -37,10 +38,10 @@ pub unsafe fn main() -> !{
     // CONFIGURE NON-SECURE CODE - FLASH CONTROLLER //
     //////////////////////////////////////////////////
 
-    // Flash controller configuration is first performed offline at a bank level.
-    // Currently 0x08000000 is set as watermakerd (i.e. secure), while 0x08040000
-    // is not-watermarked, hence non-secure. It is possible to selectively modify
-    // Pages (2kb) in non-watermarked blocks to be secure. 
+    // The flash controller is initially configured offline at the bank level. 
+    // Currently, 0x08000000 is designated as watermarked (i.e., secure), 
+    // while 0x08040000 is non-watermarked, making it non-secure. 
+    // Pages (2 KB each) within non-watermarked blocks can be selectively modified to be secure.
 
     /////////////////////////////////////
     // CONFIGURE NON-SECURE CODE - SAU //
@@ -88,7 +89,7 @@ pub unsafe fn main() -> !{
     // A block is 256 Bytes in size, A superblock is 256x32 = 8KB
     // SRAM1 is made of 192/8=24 super blocks, while SRAM2 has 8 superblocks
 
-    let gtzc_addr:u32 = 0x40032400;
+    /*let gtzc_addr:u32 = 0x40032400;
     let gtzc_ptr:*mut u32 = gtzc_addr as *mut u32;
 
     let mpcbb1_ptr = gtzc_ptr.wrapping_add(0x800/4);
@@ -100,7 +101,14 @@ pub unsafe fn main() -> !{
         // Each bit corresponds to a block. Reset all block security bit
         // To make all blocks non-secure
         *(mpcbb1_vctr.wrapping_add(i)) = 0x00000000;
-    }
+    }*/
+
+    let mut gtzc_driver : gtzc::GtzcDriver = gtzc::GtzcDriver::new();
+
+    // Reset all block security bits To make all blocks non-secure
+    let memory_bank_id : u8 = 0;
+    let security_attribute : u8 = 0; // Non secure
+    gtzc_driver.set_memory_bank_security(memory_bank_id, security_attribute);
 
     ///////////////////////////////////
     // CONFIGURE NON-SECURE CALLABLE //

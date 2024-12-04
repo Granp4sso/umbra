@@ -21,8 +21,3 @@
 #![no_std]
 
 pub mod sau;
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
