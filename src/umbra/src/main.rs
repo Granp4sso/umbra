@@ -46,52 +46,34 @@ pub unsafe fn main() -> !{
     // CONFIGURE NON-SECURE CODE - SAU //
     /////////////////////////////////////
 
-    // Configure the SAU
-    let sau_addr:u32 = 0xE000EDD0;
-    let sau_ptr:*mut u32 = sau_addr as *mut u32;
-
-    let sau_ctrl = sau_ptr;
-    let sau_type = sau_ptr.wrapping_add(1);
-    let sau_region = sau_ptr.wrapping_add(2);
-    let sau_rbar = sau_ptr.wrapping_add(3);
-    let sau_rlar = sau_ptr.wrapping_add(4);
-
     // Initialize the SAU
+    let mut sau_driver : sau::SauDriver = sau::SauDriver::new();
+    let mut sau_region_config : sau::SauRegionConfig = sau::SauRegionConfig::new();
 
-    let mut sau_descriptor : sau::SauDriver = sau::SauDriver::new();
-
-    sau_descriptor.init();
+    sau_driver.init();
+    sau_driver.enable();
 
     // By default non-defined regions are SECURE, therefore we must define the Non-secure region
-    let base_addr : u32 = 0x08040000;
-    let limit_addr : u32 = 0x08060000;      // Sau will set 5 LSB to 1
-    let nsc : u32 = 0x0;                    // NSC = 0 means the region is not NSC, hence it is non secure
-    let en : u32 = 0x1;                     // EN = 1 means the region is ENABLED
-    let new_rlar = limit_addr | (nsc << 1) | en; 
+    sau_region_config.set_base_addr(0x08040000);
+    sau_region_config.set_limit_addr(0x08060000);
+    sau_region_config.set_nsc(0x0);
+    sau_region_config.set_en(0x1);
+    sau_region_config.set_rnum(0x0);
 
-    *(sau_region) = 0;                      // Select region 0
-    *(sau_rbar) = base_addr;                // Select the base address 
-    *(sau_rlar) = new_rlar;                 // Select the limit address, security and enable
-
-    *(sau_ctrl) = 0x1;                      // Enable the SAU, otherwise the whole memory is secure
+    sau_driver.create_region(&sau_region_config);
 
     /////////////////////////////////////
     // CONFIGURE NON-SECURE DATA - SAU //
     /////////////////////////////////////
 
     // Let's use region 1 to define the whole SRAM1 as Non-secure
+    sau_region_config.set_base_addr(0x20000000);
+    sau_region_config.set_limit_addr(0x2002ffe0);
+    sau_region_config.set_nsc(0x0);
+    sau_region_config.set_en(0x1);
+    sau_region_config.set_rnum(0x1);
 
-    let base_addr : u32 = 0x20000000;
-    let limit_addr : u32 = 0x2002ffe0;      // 0x2002ffe0 + 0001f = 0x2002ffff, which is top of stack
-    let nsc : u32 = 0x0;                    // NSC = 0 means the region is not NSC, hence it is non secure
-    let en : u32 = 0x1;                     // EN = 1 means the region is ENABLED
-    let new_rlar = limit_addr | (nsc << 1) | en; 
-
-    *(sau_region) = 1;                      // Select region 1
-    *(sau_rbar) = base_addr;                // Select the base address 
-    *(sau_rlar) = new_rlar;                 // Select the limit address, security and enable
-
-    *(sau_ctrl) = 0x1;                      // Enable the SAU, otherwise the whole memory is secure
+    sau_driver.create_region(&sau_region_config);
 
     /////////////////////////////////////////////////
     // CONFIGURE NON-SECURE DATA - SRAM CONTROLLER //
@@ -125,17 +107,13 @@ pub unsafe fn main() -> !{
     ///////////////////////////////////
 
     // Configure the non-secure callable region here
-    let base_addr : u32 = 0x08030000;
-    let limit_addr : u32 = 0x0803ffe0;      
-    let nsc : u32 = 0x1;                    // NSC = 1
-    let en : u32 = 0x1;                     // EN = 1 means the region is ENABLED
-    let new_rlar = limit_addr | (nsc << 1) | en; 
+    sau_region_config.set_base_addr(0x08030000);
+    sau_region_config.set_limit_addr(0x0803ffe0);
+    sau_region_config.set_nsc(0x1);
+    sau_region_config.set_en(0x1);
+    sau_region_config.set_rnum(0x2);
 
-    *(sau_region) = 2;                      // Select region 2
-    *(sau_rbar) = base_addr;                // Select the base address 
-    *(sau_rlar) = new_rlar;                 // Select the limit address, security and enable
-
-    *(sau_ctrl) = 0x1;                      // Enable the SAU, otherwise the whole memory is secure
+    sau_driver.create_region(&sau_region_config);
 
     /////////////////////////////////////
     // Jump to Non-Secure World        //

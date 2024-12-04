@@ -1,4 +1,30 @@
 
+//////////////////////////////////////////////////////////
+//    ____           _       _                    _     //
+//   |  _ \ ___ _ __(_)_ __ | |__   ___ _ __ __ _| |    //
+//   | |_) / _ \ '__| | '_ \| '_ \ / _ \ '__/ _` | |    //
+//   |  __/  __/ |  | | |_) | | | |  __/ | | (_| | |    //
+//   |_|   \___|_|  |_| .__/|_| |_|\___|_|  \__,_|_|    //
+//    ____            |_|   _                           //
+//   |  _ \ ___  __ _(_)___| |_ ___ _ __ ___            //
+//   | |_) / _ \/ _` | / __| __/ _ \ '__/ __|           //
+//   |  _ <  __/ (_| | \__ \ ||  __/ |  \__ \           //  
+//   |_| \_\___|\__, |_|___/\__\___|_|  |___/           //
+//              |___/                                   //
+//////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////
+//                                                                              //
+// Author: Stefano Mercogliano <stefano.mercogliano@unina.it>                   //
+//                                                                              //
+// Description:                                                                 //    
+//      This module offers fundamental functions for accessing                  //
+//      peripheral registers. Supported operations include read, write,         //
+//      clear, and set. It is the responsibility of the peripheral to           //
+//      define the base address of the registers and apply offsets as needed.   //
+//                                                                              //
+//////////////////////////////////////////////////////////////////////////////////
+
 #![crate_name = "peripheral_regs"]
 #![crate_type = "rlib"]
 #![no_std]
