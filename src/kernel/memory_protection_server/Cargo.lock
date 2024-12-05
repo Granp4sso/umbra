@@ -3,17 +3,5 @@
 version = 3
 
 [[package]]
-name = "arm"
-version = "0.1.0"
-dependencies = [
- "memory_protection_server",
- "peripheral_regs",
-]
-
-[[package]]
 name = "memory_protection_server"
-version = "0.1.0"
-
-[[package]]
-name = "peripheral_regs"
 version = "0.1.0"

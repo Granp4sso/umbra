@@ -1,0 +1,7 @@
+[package]
+name = "memory_protection_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+#arm = { path = "../../architecture_drivers/arm" }

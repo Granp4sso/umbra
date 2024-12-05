@@ -6,6 +6,7 @@
 
 // Crates
 use peripheral_regs::*;
+use memory_protection_server::cpu_guard::CpuSecurityGuardTrait;
 
 //////////////////////////////////////////////////
 //    ___                 _      _              //
@@ -253,3 +254,9 @@ impl SauDriver {
 //     |_||_| \__,_|_|\__|  //
 //                          //
 //////////////////////////////
+
+impl CpuSecurityGuardTrait for SauDriver {
+    fn init(&self) {
+        
+    }
+}

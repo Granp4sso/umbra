@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 peripheral_regs = { path = "../../common/peripheral_regs" }
+memory_protection_server = { path = "../../kernel/memory_protection_server" }
