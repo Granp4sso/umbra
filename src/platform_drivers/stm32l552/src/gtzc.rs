@@ -72,12 +72,12 @@ const GTZC_MPCBB1_BASE_ADDR : u32 = GTZC_BASE_ADDR + 0x800;
 const GTZC_MPCBB2_BASE_ADDR : u32 = GTZC_BASE_ADDR + 0xC00;
 
 // Memory Protection Controller 1/2 - Control Register
-const GTZC_MPCBB_CR_REG                 : u32 = 0x000;
-const GTZC_MPCBB_CR_LCK_FIELD           : u16 = 0x0100;
-const GTZC_MPCBB_CR_INVSECSTATE_FIELD   : u16 = 0x011e;
-const GTZC_MPCBB_CR_SRWILADIS           : u16 = 0x011f;
+const _GTZC_MPCBB_CR_REG                 : u32 = 0x000;
+const _GTZC_MPCBB_CR_LCK_FIELD           : u16 = 0x0100;
+const _GTZC_MPCBB_CR_INVSECSTATE_FIELD   : u16 = 0x011e;
+const _GTZC_MPCBB_CR_SRWILADIS           : u16 = 0x011f;
 // Memory Protection Controller 1/2 - Lock Register
-const GTZC_MPCBB_LCKVTR1_REG            : u32 = 0x010;
+const _GTZC_MPCBB_LCKVTR1_REG            : u32 = 0x010;
 // Memory Protection Controller 1/2 - Vector Register
 const GTZC_MPCBB_VCTR_Y_REG             : u32 = 0x100;
 

@@ -1,6 +1,6 @@
 use core::arch::global_asm;
 
-use crate::s_fn;
+//use crate::s_fn;
 
 #[cfg(all(target_arch = "arm", target_os = "none"))]
 extern "C" {

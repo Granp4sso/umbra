@@ -25,7 +25,13 @@ pub mod non_secure_callable;
 
 // Crates
 use arm::sau;
+use memory_protection_server::cpu_guard;
 use stm32l552::gtzc;
+
+// Use
+use memory_protection_server::cpu_guard::CpuSecurityGuardTrait;
+
+
 
 #[no_mangle]
 #[allow(dead_code)]
@@ -33,6 +39,22 @@ use stm32l552::gtzc;
 #[allow(unused_assignments)]
 
 pub unsafe fn main() -> !{
+
+
+    let mut sau_driver : sau::SauDriver = sau::SauDriver::new();
+    let mut security_region : cpu_guard::GuardSecurityRegion = cpu_guard::GuardSecurityRegion::new();
+    
+    sau_driver.cpu_guard_security_init();
+
+    security_region.memory_region.base_addr = 0x08040000;
+    security_region.memory_region.limit_addr = 0x08060000;
+    security_region.memory_id = 0x0;
+    security_region.memory_security_attribute = cpu_guard::GuardSecurityAttribute::Untrusted;
+
+    sau_driver.cpu_guard_security_init();
+    sau_driver.cpu_guard_security_region_create(&security_region);
+
+    /*
 
     //////////////////////////////////////////////////
     // CONFIGURE NON-SECURE CODE - FLASH CONTROLLER //
@@ -128,7 +150,7 @@ pub unsafe fn main() -> !{
     /////////////////////////////////////
     jump_to_ns_fn();
     // ns_fn();
-    
+    */
     
     loop {}
 

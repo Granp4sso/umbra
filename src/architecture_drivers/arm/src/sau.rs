@@ -6,7 +6,10 @@
 
 // Crates
 use peripheral_regs::*;
+
 use memory_protection_server::cpu_guard::CpuSecurityGuardTrait;
+use memory_protection_server::cpu_guard::GuardSecurityRegion;
+use memory_protection_server::cpu_guard::GuardSecurityAttribute;
 
 //////////////////////////////////////////////////
 //    ___                 _      _              //
@@ -58,50 +61,50 @@ const SAU_CTRL_ENABLE_FIELD : u16 = 0x0100;
 ///////////////////////
 
 const SAU_TYPE_REG              : u32 = 0x4;
-const SAU_TYPE_SREGION_FIELD    : u16 = 0x0800;
+const _SAU_TYPE_SREGION_FIELD    : u16 = 0x0800;
 
 ///////////////////////////////
 // SAU Region Numer Register //
 ///////////////////////////////
 
 const SAU_RNR_REG           : u32 = 0x8;
-const SAU_RNR_REGION_FIELD  : u16 = 0x0800;
+const _SAU_RNR_REGION_FIELD  : u16 = 0x0800;
 
 //////////////////////////////////////
 // SAU Rebion Base Address Register //
 //////////////////////////////////////
 
 const SAU_RBAR_REG          : u32 = 0xC;
-const SAU_RBAR_BADDR_FIELD  : u16 = 0x1B05;
+const _SAU_RBAR_BADDR_FIELD  : u16 = 0x1B05;
 
 //////////////////////////
 // SAU Control Register //
 //////////////////////////
 
 const SAU_RLAR_REG           : u32 = 0x10;
-const SAU_RLAR_LADDR_FIELD   : u16 = 0x1B05;
-const SAU_RLAR_NSC_FIELD     : u16 = 0x0101;
+const _SAU_RLAR_LADDR_FIELD   : u16 = 0x1B05;
+const _SAU_RLAR_NSC_FIELD     : u16 = 0x0101;
 const SAU_RLAR_ENABLE_FIELD  : u16 = 0x0100;
 
 //////////////////////////
 // SAU Control Register //
 //////////////////////////
 
-const SAU_SFSR_REG              : u32 = 0x14;
-const SAU_SFSR_LSERR_FIELD      : u16 = 0x0107;
-const SAU_SFSR_SFARVALID_FIELD  : u16 = 0x0106;
-const SAU_SFSR_LSPERR_FIELD     : u16 = 0x0105;
-const SAU_SFSR_INVTRAN_FIELD    : u16 = 0x0104;
-const SAU_SFSR_AUVIOL_FIELD     : u16 = 0x0103;
-const SAU_SFSR_INVER_FIELD      : u16 = 0x0102;
-const SAU_SFSR_INVIS_FIELD      : u16 = 0x0101;
-const SAU_SFSR_INVEP_FIELD      : u16 = 0x0100;
+const _SAU_SFSR_REG              : u32 = 0x14;
+const _SAU_SFSR_LSERR_FIELD      : u16 = 0x0107;
+const _SAU_SFSR_SFARVALID_FIELD  : u16 = 0x0106;
+const _SAU_SFSR_LSPERR_FIELD     : u16 = 0x0105;
+const _SAU_SFSR_INVTRAN_FIELD    : u16 = 0x0104;
+const _SAU_SFSR_AUVIOL_FIELD     : u16 = 0x0103;
+const _SAU_SFSR_INVER_FIELD      : u16 = 0x0102;
+const _SAU_SFSR_INVIS_FIELD      : u16 = 0x0101;
+const _SAU_SFSR_INVEP_FIELD      : u16 = 0x0100;
 
 //////////////////////////
 // SAU Control Register //
 //////////////////////////
 
-const SAU_SFAR_REG  : u32 = 0x18;
+const _SAU_SFAR_REG  : u32 = 0x18;
 
 //////////////////////////////////////////////////////////////////////
 //    ___            _                   _        _   _             //
@@ -246,7 +249,6 @@ impl SauDriver {
 
 }
 
-
 //////////////////////////////
 //    _____         _ _     //
 //   |_   _| _ __ _(_) |_   //
@@ -256,7 +258,36 @@ impl SauDriver {
 //////////////////////////////
 
 impl CpuSecurityGuardTrait for SauDriver {
-    fn init(&self) {
-        
+    fn cpu_guard_security_init(&mut self) {
+        unsafe { 
+            self.init();
+            self.enable();
+        }
+    }
+
+    fn cpu_guard_security_region_create(&mut self, guard_security_region: & GuardSecurityRegion) {
+
+        let region_num: u8 = guard_security_region.memory_id;
+
+        let security_attribute: u8;
+
+        match guard_security_region.memory_security_attribute {
+            GuardSecurityAttribute::Untrusted => { security_attribute = 0x0; }
+            GuardSecurityAttribute::Trusted =>  { return; } // This is a placeholder, since trusted regions definition in ARM are undefined
+            GuardSecurityAttribute::SemiTrusted => { security_attribute = 0x1; }
+        }
+
+        unsafe {
+
+            let mut sau_region_config : SauRegionConfig = SauRegionConfig::new();
+
+            sau_region_config.set_rnum(region_num as u8);
+            sau_region_config.set_base_addr(guard_security_region.memory_region.base_addr);
+            sau_region_config.set_limit_addr(guard_security_region.memory_region.limit_addr);
+            sau_region_config.set_nsc(security_attribute);
+            sau_region_config.set_en(0x1);
+    
+            self.create_region(&sau_region_config);
+        }
     }
 }
