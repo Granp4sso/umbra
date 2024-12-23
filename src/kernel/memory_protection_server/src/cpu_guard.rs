@@ -14,33 +14,7 @@
 // memory protection unit implemented in CPUs. Examples are ARM SAU, MPU and
 // RISC-V PMP.
 
-enum _MemoryRegionAttribute {
-    ReadOnly,
-    ReadWrite,
-    ReadExecutable
-}
-
-pub struct MemoryRegion {
-    pub base_addr : u32,
-    pub limit_addr : u32
-}
-
-impl MemoryRegion {
-
-    pub fn new() -> Self {
-        Self {
-            base_addr: 0x0,
-            limit_addr: 0x0
-        }
-    }
-
-    pub fn create(base_addr: u32, limit_addr: u32) -> Self {
-        Self {
-            base_addr,
-            limit_addr
-        }
-    }
-}
+use memory_layout::MemoryBlock;
 
 ///////////////////////////
 // Guard Security Region //
@@ -53,27 +27,66 @@ pub enum GuardSecurityAttribute {
 }
 
 pub struct GuardSecurityRegion {
-    pub memory_id: u8,
-    pub memory_region : MemoryRegion,
-    pub memory_security_attribute : GuardSecurityAttribute
+    memory_id: u8,
+    memory_block : MemoryBlock,
+    memory_security_attribute : GuardSecurityAttribute
 }
 
 impl GuardSecurityRegion {
-
+    // Constructor with default values
     pub fn new() -> Self {
-        Self { 
+        Self {
             memory_id: 0x0,
-            memory_region: MemoryRegion::new(),
-            memory_security_attribute: GuardSecurityAttribute::Untrusted
+            memory_block: MemoryBlock::new(),
+            memory_security_attribute: GuardSecurityAttribute::Untrusted,
         }
     }
 
-    pub fn create(memory_id: u8, memory_region: MemoryRegion, memory_security_attribute: GuardSecurityAttribute) -> Self {
-        Self { 
+    // Constructor with custom values
+    pub fn create(
+        memory_id: u8,
+        memory_block: MemoryBlock,
+        memory_security_attribute: GuardSecurityAttribute,
+    ) -> Self {
+        Self {
             memory_id,
-            memory_region,
-            memory_security_attribute
+            memory_block,
+            memory_security_attribute,
         }
+    }
+
+    // Getter for memory_id
+    pub fn get_memory_id(&self) -> u8 {
+        self.memory_id
+    }
+
+    // Setter for memory_id
+    pub fn set_memory_id(&mut self, memory_id: u8) {
+        self.memory_id = memory_id;
+    }
+
+    // Getter for memory_block
+    pub fn get_memory_block(&self) -> &MemoryBlock {
+        &self.memory_block
+    }
+
+    // Setter for memory_block
+    pub fn set_memory_block(&mut self, memory_block: MemoryBlock) {
+        self.memory_block = memory_block;
+    }
+
+    pub fn set_memory_block_from_range(&mut self, base_addr: u32, limit_addr: u32) {
+        self.set_memory_block(MemoryBlock::create_from_range(base_addr, limit_addr)); 
+    }
+
+    // Getter for memory_security_attribute
+    pub fn get_memory_security_attribute(&self) -> &GuardSecurityAttribute {
+        &self.memory_security_attribute
+    }
+
+    // Setter for memory_security_attribute
+    pub fn set_memory_security_attribute(&mut self, memory_security_attribute: GuardSecurityAttribute) {
+        self.memory_security_attribute = memory_security_attribute;
     }
 }
 

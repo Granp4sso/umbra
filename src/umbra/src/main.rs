@@ -31,30 +31,12 @@ use stm32l552::gtzc;
 // Use
 use memory_protection_server::cpu_guard::CpuSecurityGuardTrait;
 
-
-
 #[no_mangle]
 #[allow(dead_code)]
 #[allow(unreachable_code)]
 #[allow(unused_assignments)]
 
 pub unsafe fn main() -> !{
-
-
-    let mut sau_driver : sau::SauDriver = sau::SauDriver::new();
-    let mut security_region : cpu_guard::GuardSecurityRegion = cpu_guard::GuardSecurityRegion::new();
-    
-    sau_driver.cpu_guard_security_init();
-
-    security_region.memory_region.base_addr = 0x08040000;
-    security_region.memory_region.limit_addr = 0x08060000;
-    security_region.memory_id = 0x0;
-    security_region.memory_security_attribute = cpu_guard::GuardSecurityAttribute::Untrusted;
-
-    sau_driver.cpu_guard_security_init();
-    sau_driver.cpu_guard_security_region_create(&security_region);
-
-    /*
 
     //////////////////////////////////////////////////
     // CONFIGURE NON-SECURE CODE - FLASH CONTROLLER //
@@ -69,34 +51,26 @@ pub unsafe fn main() -> !{
     // CONFIGURE NON-SECURE CODE - SAU //
     /////////////////////////////////////
 
-    // Initialize the SAU
     let mut sau_driver : sau::SauDriver = sau::SauDriver::new();
-    let mut sau_region_config : sau::SauRegionConfig = sau::SauRegionConfig::new();
+    let mut security_region : cpu_guard::GuardSecurityRegion = cpu_guard::GuardSecurityRegion::new();
+    sau_driver.cpu_guard_security_init();
 
-    sau_driver.init();
-    sau_driver.enable();
+    security_region.set_memory_block_from_range(0x08040000,0x08060000);
+    security_region.set_memory_id(0x0);
+    security_region.set_memory_security_attribute(cpu_guard::GuardSecurityAttribute::Untrusted);
 
-    // By default non-defined regions are SECURE, therefore we must define the Non-secure region
-    sau_region_config.set_base_addr(0x08040000);
-    sau_region_config.set_limit_addr(0x08060000);
-    sau_region_config.set_nsc(0x0);
-    sau_region_config.set_en(0x1);
-    sau_region_config.set_rnum(0x0);
-
-    sau_driver.create_region(&sau_region_config);
+    sau_driver.cpu_guard_security_region_create(&security_region);
 
     /////////////////////////////////////
     // CONFIGURE NON-SECURE DATA - SAU //
     /////////////////////////////////////
 
     // Let's use region 1 to define the whole SRAM1 as Non-secure
-    sau_region_config.set_base_addr(0x20000000);
-    sau_region_config.set_limit_addr(0x2002ffe0);
-    sau_region_config.set_nsc(0x0);
-    sau_region_config.set_en(0x1);
-    sau_region_config.set_rnum(0x1);
+    security_region.set_memory_block_from_range(0x20000000,0x2002ffe0);
+    security_region.set_memory_id(0x1);
+    security_region.set_memory_security_attribute(cpu_guard::GuardSecurityAttribute::Untrusted);
 
-    sau_driver.create_region(&sau_region_config);
+    sau_driver.cpu_guard_security_region_create(&security_region);
 
     /////////////////////////////////////////////////
     // CONFIGURE NON-SECURE DATA - SRAM CONTROLLER //
@@ -111,20 +85,6 @@ pub unsafe fn main() -> !{
     // A block is 256 Bytes in size, A superblock is 256x32 = 8KB
     // SRAM1 is made of 192/8=24 super blocks, while SRAM2 has 8 superblocks
 
-    /*let gtzc_addr:u32 = 0x40032400;
-    let gtzc_ptr:*mut u32 = gtzc_addr as *mut u32;
-
-    let mpcbb1_ptr = gtzc_ptr.wrapping_add(0x800/4);
-    let _mpcbb1_cr = mpcbb1_ptr;
-    let mpcbb1_vctr = mpcbb1_ptr.wrapping_add(0x100/4);
-
-    // Configure all 24 Superblocks as Non-Secure
-    for i in 0..24 {
-        // Each bit corresponds to a block. Reset all block security bit
-        // To make all blocks non-secure
-        *(mpcbb1_vctr.wrapping_add(i)) = 0x00000000;
-    }*/
-
     let mut gtzc_driver : gtzc::GtzcDriver = gtzc::GtzcDriver::new();
 
     // Reset all block security bits To make all blocks non-secure
@@ -137,20 +97,18 @@ pub unsafe fn main() -> !{
     ///////////////////////////////////
 
     // Configure the non-secure callable region here
-    sau_region_config.set_base_addr(0x08030000);
-    sau_region_config.set_limit_addr(0x0803ffe0);
-    sau_region_config.set_nsc(0x1);
-    sau_region_config.set_en(0x1);
-    sau_region_config.set_rnum(0x2);
+    security_region.set_memory_block_from_range(0x08030000,0x0803ffe0);
+    security_region.set_memory_id(0x2);
+    security_region.set_memory_security_attribute(cpu_guard::GuardSecurityAttribute::SemiTrusted);
 
-    sau_driver.create_region(&sau_region_config);
+    sau_driver.cpu_guard_security_region_create(&security_region);
 
     /////////////////////////////////////
     // Jump to Non-Secure World        //
     /////////////////////////////////////
     jump_to_ns_fn();
     // ns_fn();
-    */
+    
     
     loop {}
 

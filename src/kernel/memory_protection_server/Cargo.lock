@@ -3,5 +3,12 @@
 version = 3
 
 [[package]]
+name = "memory_layout"
+version = "0.1.0"
+
+[[package]]
 name = "memory_protection_server"
 version = "0.1.0"
+dependencies = [
+ "memory_layout",
+]

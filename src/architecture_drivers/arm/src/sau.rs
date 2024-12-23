@@ -11,6 +11,8 @@ use memory_protection_server::cpu_guard::CpuSecurityGuardTrait;
 use memory_protection_server::cpu_guard::GuardSecurityRegion;
 use memory_protection_server::cpu_guard::GuardSecurityAttribute;
 
+use memory_layout;
+
 //////////////////////////////////////////////////
 //    ___                 _      _              //
 //   |   \ ___ ___ __ _ _(_)_ __| |_ ___ _ _    //
@@ -267,11 +269,13 @@ impl CpuSecurityGuardTrait for SauDriver {
 
     fn cpu_guard_security_region_create(&mut self, guard_security_region: & GuardSecurityRegion) {
 
-        let region_num: u8 = guard_security_region.memory_id;
+        let region_num: u8 = guard_security_region.get_memory_id();
+        let region_base_address: u32 = memory_layout::MEMORY_BLOCK_SIZE*(guard_security_region.get_memory_block().get_block_base_id());
+        let region_limit_address: u32 = memory_layout::MEMORY_BLOCK_SIZE*(guard_security_region.get_memory_block().get_block_num()) + region_base_address;
 
         let security_attribute: u8;
 
-        match guard_security_region.memory_security_attribute {
+        match guard_security_region.get_memory_security_attribute() {
             GuardSecurityAttribute::Untrusted => { security_attribute = 0x0; }
             GuardSecurityAttribute::Trusted =>  { return; } // This is a placeholder, since trusted regions definition in ARM are undefined
             GuardSecurityAttribute::SemiTrusted => { security_attribute = 0x1; }
@@ -282,8 +286,8 @@ impl CpuSecurityGuardTrait for SauDriver {
             let mut sau_region_config : SauRegionConfig = SauRegionConfig::new();
 
             sau_region_config.set_rnum(region_num as u8);
-            sau_region_config.set_base_addr(guard_security_region.memory_region.base_addr);
-            sau_region_config.set_limit_addr(guard_security_region.memory_region.limit_addr);
+            sau_region_config.set_base_addr(region_base_address);
+            sau_region_config.set_limit_addr(region_limit_address);
             sau_region_config.set_nsc(security_attribute);
             sau_region_config.set_en(0x1);
     

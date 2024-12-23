@@ -6,13 +6,21 @@ version = 3
 name = "arm"
 version = "0.1.0"
 dependencies = [
+ "memory_layout",
  "memory_protection_server",
  "peripheral_regs",
 ]
 
 [[package]]
+name = "memory_layout"
+version = "0.1.0"
+
+[[package]]
 name = "memory_protection_server"
 version = "0.1.0"
+dependencies = [
+ "memory_layout",
+]
 
 [[package]]
 name = "peripheral_regs"

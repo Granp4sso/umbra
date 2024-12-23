@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-#arm = { path = "../../architecture_drivers/arm" }
+memory_layout = { path = "../../common/memory_layout" }
