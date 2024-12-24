@@ -6,12 +6,9 @@
 
 // Crates
 use peripheral_regs::*;
+use memory_layout::*;
 
-use memory_protection_server::cpu_guard::CpuSecurityGuardTrait;
-use memory_protection_server::cpu_guard::GuardSecurityRegion;
-use memory_protection_server::cpu_guard::GuardSecurityAttribute;
-
-use memory_layout;
+use memory_protection_server::memory_guard::MemorySecurityGuardTrait;
 
 //////////////////////////////////////////////////
 //    ___                 _      _              //
@@ -245,6 +242,24 @@ impl SauDriver {
         write_register(regs_base_address, SAU_RLAR_REG, limit_addr); 
     }
 
+    // Search for a free region
+    // NB - IT ASSUMES A FREE REGION ALWAYS EXIST, TO REFACTOR
+    pub unsafe fn get_free_region(&mut self) -> u8 {
+        let regs_base_address = self.regs as *const SauRegisters as *const u32;
+        let region_num : u8 = read_register(regs_base_address, SAU_TYPE_REG) as u8;
+
+        for i in 0..region_num {
+            // First, select the region
+            write_register(regs_base_address, SAU_RNR_REG, i as u32);
+            // Let's read the region enable bit
+            if (read_register(regs_base_address, SAU_RLAR_REG) & 0x1) == 0 {
+                return i as u8;
+            }
+        }
+
+        return 0 as u8;
+    }
+
     // Delete Region
     // Get Sau Region Count
     // Get Sau Region
@@ -259,30 +274,31 @@ impl SauDriver {
 //                          //
 //////////////////////////////
 
-impl CpuSecurityGuardTrait for SauDriver {
-    fn cpu_guard_security_init(&mut self) {
+impl MemorySecurityGuardTrait for SauDriver {
+
+    fn memory_security_guard_init(&mut self) {
         unsafe { 
             self.init();
             self.enable();
         }
     }
 
-    fn cpu_guard_security_region_create(&mut self, guard_security_region: & GuardSecurityRegion) {
+    fn memory_security_guard_create(&mut self, memory_block_list: & MemoryBlockList) {
 
-        let region_num: u8 = guard_security_region.get_memory_id();
-        let region_base_address: u32 = memory_layout::MEMORY_BLOCK_SIZE*(guard_security_region.get_memory_block().get_block_base_id());
-        let region_limit_address: u32 = memory_layout::MEMORY_BLOCK_SIZE*(guard_security_region.get_memory_block().get_block_num()) + region_base_address;
+        let region_base_address: u32 = memory_layout::MEMORY_BLOCK_SIZE*(memory_block_list.get_memory_block().get_block_base_address());
+        let region_limit_address: u32 = memory_layout::MEMORY_BLOCK_SIZE*(memory_block_list.get_memory_block_list_size()) + region_base_address;
 
         let security_attribute: u8;
 
-        match guard_security_region.get_memory_security_attribute() {
-            GuardSecurityAttribute::Untrusted => { security_attribute = 0x0; }
-            GuardSecurityAttribute::Trusted =>  { return; } // This is a placeholder, since trusted regions definition in ARM are undefined
-            GuardSecurityAttribute::SemiTrusted => { security_attribute = 0x1; }
+        match memory_block_list.get_memory_block().get_block_security_attribute() {
+            memory_layout::MemoryBlockSecurityAttribute::Untrusted => { security_attribute = 0x0; }
+            memory_layout::MemoryBlockSecurityAttribute::Trusted =>  { return; } // This is a placeholder, since trusted regions definition in ARM are undefined
+            memory_layout::MemoryBlockSecurityAttribute::TrustedGateway => { security_attribute = 0x1; }
         }
 
         unsafe {
 
+            let region_num: u8 = self.get_free_region();
             let mut sau_region_config : SauRegionConfig = SauRegionConfig::new();
 
             sau_region_config.set_rnum(region_num as u8);

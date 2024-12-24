@@ -17,6 +17,4 @@
 #![crate_type = "rlib"]
 #![no_std]
 
-pub mod cpu_guard;
-pub mod flash_guard;
-pub mod ram_guard;
+pub mod memory_guard;

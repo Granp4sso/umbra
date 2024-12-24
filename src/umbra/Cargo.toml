@@ -7,6 +7,7 @@ edition = "2021"
 arm = { path = "../architecture_drivers/arm" }
 stm32l552 = { path = "../platform_drivers/stm32l552" }
 memory_protection_server = { path = "../kernel/memory_protection_server" }
+memory_layout = { path = "../common/memory_layout" }
 
 [profile.release]
 codegen-units = 1 # better optimizations

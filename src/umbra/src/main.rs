@@ -25,11 +25,10 @@ pub mod non_secure_callable;
 
 // Crates
 use arm::sau;
-use memory_protection_server::cpu_guard;
 use stm32l552::gtzc;
 
 // Use
-use memory_protection_server::cpu_guard::CpuSecurityGuardTrait;
+use memory_protection_server::memory_guard::MemorySecurityGuardTrait;
 
 #[no_mangle]
 #[allow(dead_code)]
@@ -52,25 +51,22 @@ pub unsafe fn main() -> !{
     /////////////////////////////////////
 
     let mut sau_driver : sau::SauDriver = sau::SauDriver::new();
-    let mut security_region : cpu_guard::GuardSecurityRegion = cpu_guard::GuardSecurityRegion::new();
-    sau_driver.cpu_guard_security_init();
+    sau_driver.memory_security_guard_init();
 
-    security_region.set_memory_block_from_range(0x08040000,0x08060000);
-    security_region.set_memory_id(0x0);
-    security_region.set_memory_security_attribute(cpu_guard::GuardSecurityAttribute::Untrusted);
+    let mut memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x08040000,0x08060000);
+    memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::Untrusted);
 
-    sau_driver.cpu_guard_security_region_create(&security_region);
+    sau_driver.memory_security_guard_create(&memory_block_list);
 
     /////////////////////////////////////
     // CONFIGURE NON-SECURE DATA - SAU //
     /////////////////////////////////////
 
     // Let's use region 1 to define the whole SRAM1 as Non-secure
-    security_region.set_memory_block_from_range(0x20000000,0x2002ffe0);
-    security_region.set_memory_id(0x1);
-    security_region.set_memory_security_attribute(cpu_guard::GuardSecurityAttribute::Untrusted);
+    memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x20000000,0x2002ffe0);
+    memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::Untrusted);
 
-    sau_driver.cpu_guard_security_region_create(&security_region);
+    sau_driver.memory_security_guard_create(&memory_block_list);
 
     /////////////////////////////////////////////////
     // CONFIGURE NON-SECURE DATA - SRAM CONTROLLER //
@@ -97,11 +93,10 @@ pub unsafe fn main() -> !{
     ///////////////////////////////////
 
     // Configure the non-secure callable region here
-    security_region.set_memory_block_from_range(0x08030000,0x0803ffe0);
-    security_region.set_memory_id(0x2);
-    security_region.set_memory_security_attribute(cpu_guard::GuardSecurityAttribute::SemiTrusted);
+    memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x08030000,0x0803ffe0);
+    memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::TrustedGateway);
 
-    sau_driver.cpu_guard_security_region_create(&security_region);
+    sau_driver.memory_security_guard_create(&memory_block_list);
 
     /////////////////////////////////////
     // Jump to Non-Secure World        //
