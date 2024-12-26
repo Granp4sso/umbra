@@ -37,6 +37,15 @@ use memory_protection_server::memory_guard::MemorySecurityGuardTrait;
 
 pub unsafe fn main() -> !{
 
+    //////////////////////////////
+    // INITIALIZE MEMORY GUARDS //
+    //////////////////////////////
+
+    let mut sau_driver : sau::SauDriver = sau::SauDriver::new();
+    let mut gtzc_driver : gtzc::GtzcDriver = gtzc::GtzcDriver::new();
+    sau_driver.memory_security_guard_init();
+    gtzc_driver.memory_security_guard_init();
+
     //////////////////////////////////////////////////
     // CONFIGURE NON-SECURE CODE - FLASH CONTROLLER //
     //////////////////////////////////////////////////
@@ -50,12 +59,8 @@ pub unsafe fn main() -> !{
     // CONFIGURE NON-SECURE CODE - SAU //
     /////////////////////////////////////
 
-    let mut sau_driver : sau::SauDriver = sau::SauDriver::new();
-    sau_driver.memory_security_guard_init();
-
     let mut memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x08040000,0x08060000);
     memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::Untrusted);
-
     sau_driver.memory_security_guard_create(&memory_block_list);
 
     /////////////////////////////////////
@@ -65,7 +70,6 @@ pub unsafe fn main() -> !{
     // Let's use region 1 to define the whole SRAM1 as Non-secure
     memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x20000000,0x2002ffe0);
     memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::Untrusted);
-
     sau_driver.memory_security_guard_create(&memory_block_list);
 
     /////////////////////////////////////////////////
@@ -81,12 +85,10 @@ pub unsafe fn main() -> !{
     // A block is 256 Bytes in size, A superblock is 256x32 = 8KB
     // SRAM1 is made of 192/8=24 super blocks, while SRAM2 has 8 superblocks
 
-    let mut gtzc_driver : gtzc::GtzcDriver = gtzc::GtzcDriver::new();
-
-    // Reset all block security bits To make all blocks non-secure
-    let memory_bank_id : u8 = 0;
-    let security_attribute : u8 = 0; // Non secure
-    gtzc_driver.set_memory_bank_security(memory_bank_id, security_attribute);
+    // Reset all block security bits To make all blocks non-secure for SRAM1
+    memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x20000000,0x20030000);
+    memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::Untrusted);
+    gtzc_driver.memory_security_guard_create(&memory_block_list);
 
     ///////////////////////////////////
     // CONFIGURE NON-SECURE CALLABLE //
@@ -95,7 +97,6 @@ pub unsafe fn main() -> !{
     // Configure the non-secure callable region here
     memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x08030000,0x0803ffe0);
     memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::TrustedGateway);
-
     sau_driver.memory_security_guard_create(&memory_block_list);
 
     /////////////////////////////////////

@@ -27,6 +27,9 @@
 
 // Crates
 use peripheral_regs::*;
+use memory_layout::*;
+
+use memory_protection_server::memory_guard::MemorySecurityGuardTrait;
 
 //////////////////////////////////////////////////
 //    ___                 _      _              //
@@ -37,18 +40,7 @@ use peripheral_regs::*;
 //////////////////////////////////////////////////
 
 const GTZC_BASE_ADDR: u32 = 0x40032400;
-
-#[repr(C)]
-struct GtzcRegisters {
-    gtzc_base_addr : u32
-}
-
-impl GtzcRegisters {
-    /// Creates a new instance from the base address, allowing register access
-    fn new() -> &'static mut Self {
-        unsafe { &mut *(GTZC_BASE_ADDR as *mut Self) }
-    }
-}
+type GtzcRegisters = u32;
 
 //////////////////////////////////////////////
 //     ___             _            _       //
@@ -109,7 +101,7 @@ impl GtzcDriver {
 
     // Constructor
     pub fn new() -> Self {
-        let regs = GtzcRegisters::new();
+        let regs = unsafe { &mut *(GTZC_BASE_ADDR as *mut GtzcRegisters) };
         Self { regs }
     }
 
@@ -117,7 +109,8 @@ impl GtzcDriver {
     // A block is 256 Bytes in size, A superblock is 256x32 = 8KB
     // SRAM1 is made of 192/8=24 super blocks, while SRAM2 has 8 superblocks
 
-    pub unsafe fn set_memory_bank_security( &mut self, memory_bank_id : u8, secure_flag: u8 ) {
+    // Currently unused, therefore commented
+    /*pub unsafe fn set_memory_bank_security( &mut self, memory_bank_id : u8, secure_flag: u8 ) {
 
         // Disclaimer: SRAM sizes are hardcoded atm, they shall be taken from the linker script symbol
         let sram1_size : u32 = 24; 
@@ -145,7 +138,7 @@ impl GtzcDriver {
         let secure_data = if secure_flag == 0 {0x00000000} else {0xffffffff};
         write_register(regs_base_address, block_reg_offset, secure_data);
 
-    }
+    }*/
 
     // This function sets block X in superblock Y security attribute
     pub unsafe fn set_memory_block_security( &mut self, memory_bank_id : u8, super_block_id : u8, block_id : u8, secure_flag: u8 ) {
@@ -180,3 +173,75 @@ impl GtzcDriver {
 //     |_||_| \__,_|_|\__|  //
 //                          //
 //////////////////////////////
+
+impl MemorySecurityGuardTrait for GtzcDriver {
+
+    fn memory_security_guard_init(&mut self) {
+        // Currently there is no initialization required for GTZC
+    }
+
+    fn memory_security_guard_create(&mut self, memory_block_list: & MemoryBlockList) {
+
+        /////////////////////////////////////////////////////////////////////
+        // NOTES: Sanitizations and Error Handling are not implemented yet //
+        /////////////////////////////////////////////////////////////////////
+
+        // These are all placeholders and shall be replaced with linker script symbols
+        let bank1_start = 0x20000000;
+        let _bank1_end = 0x20030000;
+        let _bank2_start = 0x20030000;
+        let bank2_end = 0x20040000;
+
+        // Get base and limit address for the region
+        let mut region_base_address: u32 = memory_layout::MEMORY_BLOCK_SIZE*(memory_block_list.get_memory_block().get_block_base_address());
+
+        // Does the requested region fall into the GTZC owned memory?
+        if region_base_address < bank1_start || region_base_address >= bank2_end {
+            // Ignore this region definition (NB: for future we will need some error/warning handling)
+            return; 
+        }
+
+        // Identify the security attribute for the blocks
+        let secure_flag: u8;
+        match memory_block_list.get_memory_block().get_block_security_attribute() {
+            memory_layout::MemoryBlockSecurityAttribute::Untrusted => { secure_flag = 0x0; }
+            memory_layout::MemoryBlockSecurityAttribute::Trusted =>  { secure_flag = 0x1; }
+            // This is a placeholder, since no TG are defined for the GTZC
+            memory_layout::MemoryBlockSecurityAttribute::TrustedGateway => { return; }
+        }
+
+        // Compute Bank, Superblock and Block
+        let gtzc_block_per_memory_block = memory_layout::MEMORY_BLOCK_SIZE / 256;
+        let gtzc_block_num = memory_block_list.get_memory_block_list_size()*gtzc_block_per_memory_block;
+
+        unsafe {
+            for _i in 0..gtzc_block_num {
+
+                // Parse block info from address
+                let upper_address_id = (region_base_address >> 13) & 0x1f;
+                let lower_address_id = (region_base_address >> 8) & 0x1f;
+
+                let bank_id: u8;
+                let super_block_id: u8;
+                let block_id: u8;
+
+                if (upper_address_id >> 3) != 0x3 {
+                    // Bank 1 (first 24 superblocks)
+                    bank_id = 0 as u8;
+                    super_block_id = upper_address_id as u8;
+                } else {
+                    // Bank 2 (last 8 superblocks)
+                    bank_id = 1 as u8;
+                    super_block_id = (upper_address_id & 0x7) as u8;
+                }
+
+                block_id = lower_address_id as u8;
+
+                // Set security for the block
+                self.set_memory_block_security( bank_id, super_block_id, block_id, secure_flag );
+                region_base_address += 256;
+            }
+            
+        }
+    }
+}

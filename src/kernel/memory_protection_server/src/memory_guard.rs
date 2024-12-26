@@ -8,15 +8,16 @@
 //                                                              //
 //////////////////////////////////////////////////////////////////
 
-// The CPU Guard module implements the methods to access the hardware-defined
-// memory protection unit implemented in CPUs. Examples are ARM SAU, MPU and
-// RISC-V PMP.
+// The memory Guard module implements the methods to access the hardware-defined
+// memory protection units implemented at a SoC level. Examples include the 
+// Flash memory controllers, SRAM security controllers, CPU Memory protection units
+// (e.g. SAU, Secure MPU, RISC-V PMP)
 
 use memory_layout::MemoryBlockList;
 
-//////////////////////////////
+////////////////////////
 // Memory Guard Trait //
-//////////////////////////////
+////////////////////////
 
 pub trait MemorySecurityGuardTrait {
 

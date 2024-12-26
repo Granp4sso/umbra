@@ -3,6 +3,17 @@
 version = 3
 
 [[package]]
+name = "memory_layout"
+version = "0.1.0"
+
+[[package]]
+name = "memory_protection_server"
+version = "0.1.0"
+dependencies = [
+ "memory_layout",
+]
+
+[[package]]
 name = "peripheral_regs"
 version = "0.1.0"
 
@@ -10,5 +21,7 @@ version = "0.1.0"
 name = "stm32l552"
 version = "0.1.0"
 dependencies = [
+ "memory_layout",
+ "memory_protection_server",
  "peripheral_regs",
 ]

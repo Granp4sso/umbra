@@ -19,24 +19,7 @@ use memory_protection_server::memory_guard::MemorySecurityGuardTrait;
 //////////////////////////////////////////////////
 
 const SAU_BASE_ADDR: u32 = 0xE000EDD0;
-
-#[repr(C)]
-struct SauRegisters {
-    sau_ctrl    : u32,
-    sau_type    : u32,
-    sau_rnr     : u32,
-    sau_rbar    : u32,
-    sau_rlar    : u32,
-    sau_sfsr    : u32,
-    sau_sfar    : u32
-}
-
-impl SauRegisters {
-    /// Creates a new instance from the base address, allowing register access
-    fn new() -> &'static mut Self {
-        unsafe { &mut *(SAU_BASE_ADDR as *mut Self) }
-    }
-}
+type SauRegisters = u32;
 
 //////////////////////////////////////////////
 //     ___             _            _       //
@@ -195,7 +178,7 @@ impl SauDriver {
 
     // Constructor
     pub fn new() -> Self {
-        let regs = SauRegisters::new();
+        let regs = unsafe { &mut *(SAU_BASE_ADDR as *mut SauRegisters) };
         Self { regs }
     }
 
