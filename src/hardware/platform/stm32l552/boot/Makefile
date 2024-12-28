@@ -10,7 +10,7 @@
 #                                       	#
 #############################################
 
-PROJECT = umbra
+PROJECT = boot
 BINPATH = target/thumbv8m.main-none-eabihf/debug
 
 LD_SCRIPT = ${LD_SCRIPT_DIR}/${MCU}.ld

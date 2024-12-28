@@ -13,8 +13,5 @@
 // Modern microcontrollers implement multi-layered security models, where a memory access must be permitted by 
 // all security controllers, including the CPU, flash controller, and RAM controller.
 
-#![crate_name = "memory_protection_server"]
-#![crate_type = "rlib"]
-#![no_std]
 
 pub mod memory_guard;

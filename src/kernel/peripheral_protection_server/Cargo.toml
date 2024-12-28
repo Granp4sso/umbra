@@ -1,6 +1,0 @@
-[package]
-name = "peripheral_protection_server"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]

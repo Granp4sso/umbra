@@ -17,3 +17,8 @@ documentation/*
 # Ignore crates builds
 src/*/target/*
 src/*/*/target/*
+src/*/*/*/target/*
+src/*/*/*/*/target/*
+
+# Ignore deprecated
+deprecated

@@ -28,7 +28,9 @@ use arm::sau;
 use drivers::gtzc;
 
 // Use
-use memory_protection_server::memory_guard::MemorySecurityGuardTrait;
+use kernel::memory_protection_server::memory_guard::MemorySecurityGuardTrait;
+use kernel::common::memory_layout::MemoryBlockList;
+use kernel::common::memory_layout::MemoryBlockSecurityAttribute;
 
 #[no_mangle]
 #[allow(dead_code)]
@@ -59,8 +61,8 @@ pub unsafe fn main() -> !{
     // CONFIGURE NON-SECURE CODE - SAU //
     /////////////////////////////////////
 
-    let mut memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x08040000,0x08060000);
-    memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::Untrusted);
+    let mut memory_block_list = MemoryBlockList::create_from_range(0x08040000,0x08060000);
+    memory_block_list.set_memory_block_security(MemoryBlockSecurityAttribute::Untrusted);
     sau_driver.memory_security_guard_create(&memory_block_list);
 
     /////////////////////////////////////
@@ -68,8 +70,8 @@ pub unsafe fn main() -> !{
     /////////////////////////////////////
 
     // Let's use region 1 to define the whole SRAM1 as Non-secure
-    memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x20000000,0x2002ffe0);
-    memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::Untrusted);
+    memory_block_list = MemoryBlockList::create_from_range(0x20000000,0x2002ffe0);
+    memory_block_list.set_memory_block_security(MemoryBlockSecurityAttribute::Untrusted);
     sau_driver.memory_security_guard_create(&memory_block_list);
 
     /////////////////////////////////////////////////
@@ -86,8 +88,8 @@ pub unsafe fn main() -> !{
     // SRAM1 is made of 192/8=24 super blocks, while SRAM2 has 8 superblocks
 
     // Reset all block security bits To make all blocks non-secure for SRAM1
-    memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x20000000,0x20030000);
-    memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::Untrusted);
+    memory_block_list = MemoryBlockList::create_from_range(0x20000000,0x20030000);
+    memory_block_list.set_memory_block_security(MemoryBlockSecurityAttribute::Untrusted);
     gtzc_driver.memory_security_guard_create(&memory_block_list);
 
     ///////////////////////////////////
@@ -95,8 +97,8 @@ pub unsafe fn main() -> !{
     ///////////////////////////////////
 
     // Configure the non-secure callable region here
-    memory_block_list = memory_layout::MemoryBlockList::create_from_range(0x08030000,0x0803ffe0);
-    memory_block_list.set_memory_block_security(memory_layout::MemoryBlockSecurityAttribute::TrustedGateway);
+    memory_block_list = MemoryBlockList::create_from_range(0x08030000,0x0803ffe0);
+    memory_block_list.set_memory_block_security(MemoryBlockSecurityAttribute::TrustedGateway);
     sau_driver.memory_security_guard_create(&memory_block_list);
 
     /////////////////////////////////////

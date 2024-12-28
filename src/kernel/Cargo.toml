@@ -1,5 +1,5 @@
 [package]
-name = "key_storage_server"
+name = "kernel"
 version = "0.1.0"
 edition = "2021"
 

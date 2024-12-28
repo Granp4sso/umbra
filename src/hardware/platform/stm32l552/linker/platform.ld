@@ -1,4 +1,14 @@
-/* Author: Stefano Mercogliano <stefano.mercogliano@unina.it>*/
+/*********************************************************************************************************
+*
+*   Author: Stefano Mercogliano <stefano.mercogliano@unina.it>
+*   Notes:
+*       Secure Flash and Non Secure Flash can be statically defined on stm32lxxx-based boards.
+*       Currently, we assume the first bank on stm32l552 to be secure, and the second to be non-secure.
+*       Watermatking could also be included in the bootloader, or statically defined at a finer level
+*       Than bank (e.g. pages). 
+*
+**********************************************************************************************************/
+
 MEMORY
 {
     SECURE_FLASH        (RXAL)  : ORIGIN = 0x08000000,                                      LENGTH = 256K,

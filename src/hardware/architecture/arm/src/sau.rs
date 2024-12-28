@@ -6,9 +6,10 @@
 
 // Crates
 use peripheral_regs::*;
-use memory_layout::*;
-
-use memory_protection_server::memory_guard::MemorySecurityGuardTrait;
+use kernel::common::memory_layout::MEMORY_BLOCK_SIZE;
+use kernel::common::memory_layout::MemoryBlockList;
+use kernel::common::memory_layout::MemoryBlockSecurityAttribute;
+use kernel::memory_protection_server::memory_guard::MemorySecurityGuardTrait;
 
 //////////////////////////////////////////////////
 //    ___                 _      _              //
@@ -268,15 +269,15 @@ impl MemorySecurityGuardTrait for SauDriver {
 
     fn memory_security_guard_create(&mut self, memory_block_list: & MemoryBlockList) {
 
-        let region_base_address: u32 = memory_layout::MEMORY_BLOCK_SIZE*(memory_block_list.get_memory_block().get_block_base_address());
-        let region_limit_address: u32 = memory_layout::MEMORY_BLOCK_SIZE*(memory_block_list.get_memory_block_list_size()) + region_base_address;
+        let region_base_address: u32 = MEMORY_BLOCK_SIZE*(memory_block_list.get_memory_block().get_block_base_address());
+        let region_limit_address: u32 = MEMORY_BLOCK_SIZE*(memory_block_list.get_memory_block_list_size()) + region_base_address;
 
         let security_attribute: u8;
 
         match memory_block_list.get_memory_block().get_block_security_attribute() {
-            memory_layout::MemoryBlockSecurityAttribute::Untrusted => { security_attribute = 0x0; }
-            memory_layout::MemoryBlockSecurityAttribute::Trusted =>  { return; } // This is a placeholder, since trusted regions definition in ARM are undefined
-            memory_layout::MemoryBlockSecurityAttribute::TrustedGateway => { security_attribute = 0x1; }
+            MemoryBlockSecurityAttribute::Untrusted => { security_attribute = 0x0; }
+            MemoryBlockSecurityAttribute::Trusted =>  { return; } // This is a placeholder, since trusted regions definition in ARM are undefined
+            MemoryBlockSecurityAttribute::TrustedGateway => { security_attribute = 0x1; }
         }
 
         unsafe {

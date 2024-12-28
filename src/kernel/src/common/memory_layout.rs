@@ -18,10 +18,6 @@
 //                                                                              //
 //////////////////////////////////////////////////////////////////////////////////
 
-#![crate_name = "memory_layout"]
-#![crate_type = "rlib"]
-#![no_std]
-
 pub const MEMORY_BLOCK_SIZE: u32 = 256;
 pub const MEMORY_SUPER_BLOCK_SIZE: u32 = MEMORY_BLOCK_SIZE*16;
 

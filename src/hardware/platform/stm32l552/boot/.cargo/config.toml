@@ -1,7 +1,7 @@
 [target.thumbv8m.main-none-eabihf]
 rustflags = [
   "-C", "linker=/opt/gcc-arm-none-eabi/bin/arm-none-eabi-ld",
-  "-C", "link-arg=-T/home/stefano/Desktop/Work/Projects/umbra/linker/STM32L552ZETXQ.ld"
+  "-C", "link-arg=-T../linker/platform.ld"
 ]
 [build]
 target = "thumbv8m.main-none-eabihf"

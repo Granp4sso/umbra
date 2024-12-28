@@ -13,7 +13,7 @@
 // Flash memory controllers, SRAM security controllers, CPU Memory protection units
 // (e.g. SAU, Secure MPU, RISC-V PMP)
 
-use memory_layout::MemoryBlockList;
+use crate::common::memory_layout::MemoryBlockList;
 
 ////////////////////////
 // Memory Guard Trait //

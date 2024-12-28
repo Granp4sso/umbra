@@ -27,9 +27,10 @@
 
 // Crates
 use peripheral_regs::*;
-use memory_layout::*;
-
-use memory_protection_server::memory_guard::MemorySecurityGuardTrait;
+use kernel::common::memory_layout::MEMORY_BLOCK_SIZE;
+use kernel::common::memory_layout::MemoryBlockList;
+use kernel::common::memory_layout::MemoryBlockSecurityAttribute;
+use kernel::memory_protection_server::memory_guard::MemorySecurityGuardTrait;
 
 //////////////////////////////////////////////////
 //    ___                 _      _              //
@@ -193,7 +194,7 @@ impl MemorySecurityGuardTrait for GtzcDriver {
         let bank2_end = 0x20040000;
 
         // Get base and limit address for the region
-        let mut region_base_address: u32 = memory_layout::MEMORY_BLOCK_SIZE*(memory_block_list.get_memory_block().get_block_base_address());
+        let mut region_base_address: u32 = MEMORY_BLOCK_SIZE*(memory_block_list.get_memory_block().get_block_base_address());
 
         // Does the requested region fall into the GTZC owned memory?
         if region_base_address < bank1_start || region_base_address >= bank2_end {
@@ -204,14 +205,14 @@ impl MemorySecurityGuardTrait for GtzcDriver {
         // Identify the security attribute for the blocks
         let secure_flag: u8;
         match memory_block_list.get_memory_block().get_block_security_attribute() {
-            memory_layout::MemoryBlockSecurityAttribute::Untrusted => { secure_flag = 0x0; }
-            memory_layout::MemoryBlockSecurityAttribute::Trusted =>  { secure_flag = 0x1; }
+            MemoryBlockSecurityAttribute::Untrusted => { secure_flag = 0x0; }
+            MemoryBlockSecurityAttribute::Trusted =>  { secure_flag = 0x1; }
             // This is a placeholder, since no TG are defined for the GTZC
-            memory_layout::MemoryBlockSecurityAttribute::TrustedGateway => { return; }
+            MemoryBlockSecurityAttribute::TrustedGateway => { return; }
         }
 
         // Compute Bank, Superblock and Block
-        let gtzc_block_per_memory_block = memory_layout::MEMORY_BLOCK_SIZE / 256;
+        let gtzc_block_per_memory_block = MEMORY_BLOCK_SIZE / 256;
         let gtzc_block_num = memory_block_list.get_memory_block_list_size()*gtzc_block_per_memory_block;
 
         unsafe {
