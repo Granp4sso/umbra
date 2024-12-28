@@ -1,0 +1,9 @@
+[package]
+name = "arm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+peripheral_regs = { path = "../../common/peripheral_regs" }
+memory_layout = { path = "../../../kernel/memory_layout" }
+memory_protection_server = { path = "../../../kernel/memory_protection_server" }

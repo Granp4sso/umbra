@@ -1,0 +1,95 @@
+# Author: Stefano Mercogliano 	<stefano.mercogliano@unina.it>
+# Description:
+#   This Makefile defines the project name and paths for the common Makefile.
+#	Optionally, a user can define additional targets here.
+
+################
+# Program Name #
+################
+
+# $(MAKEFILE_LIST)			: Contains a list of all Makefiles parsed (This Makefile and common Makefile)
+# $(first $(MAKEFILE_LIST))	: Extracts the first entry, which is the current Makefile.
+# $(abspath ...)			: Converts the relative path of the Makefile to an absolute path.
+# $(dir ...)				: Extracts the directory portion of the absolute path.
+# $(shell basename ...)		: Extracts the last component of the directory path, which is the name of the directory containing the Makefile.
+PROGRAM_NAME = $(shell basename $(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
+
+#####################
+# Paths and Folders #
+#####################
+
+SRC_DIR		= src
+OBJ_DIR		= obj
+INC_DIR 	= inc 
+STARTUP_DIR = src
+
+LD_SCRIPT 	= linker/linker.ld 
+
+#############
+# Libraries #
+#############
+
+LIB_OBJ_LIST = 
+LIB_INC_LIST =
+
+#############
+# Toolchain #
+#############
+
+CC_PREFIX 	= /opt/gcc-arm-none-eabi/bin/arm-none-eabi-
+CC 			= $(CC_PREFIX)gcc
+LD 			= $(CC_PREFIX)ld
+OBJDUMP 	= $(CC_PREFIX)objdump
+OBJCOPY 	= $(CC_PREFIX)objcopy
+
+CFLAGS 		= -O0 -c 
+LDFLAGS 	= $(LIB_OBJ_LIST) -nostdlib -T$(LD_SCRIPT)
+LIB_DIR	= 
+
+########
+# Misc #
+########
+
+SRCS 	= $(wildcard src/*.c) $(wildcard lib/*.c)
+OBJS 	= $(addprefix $(OBJ_DIR)/, $(notdir $(SRCS:.c=.o)))
+
+RM      = rm -rf 					# Remove recursively command
+MKDIR   = @mkdir -p $(@D) 			# Creates folders if not present
+
+###############################################################################
+
+###########
+# Targets #
+###########
+
+all: bin/$(PROGRAM_NAME).bin
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@echo "\n[OBJ]	Creating OBJs from src"
+	$(MKDIR)
+	$(CC) -o $@ $^ -I$(INC_DIR) $(LIB_INC_LIST) $(CFLAGS)
+
+obj/startup.o: 
+	@echo "\n[OBJ]	Creating OBJs from $(STARTUP_DIR)/startup.s"
+	$(MKDIR)
+	$(CC) -o obj/startup.o $(STARTUP_DIR)/startup.s -I$(LIB_INC_LIST) $(CFLAGS)
+
+bin/$(PROGRAM_NAME).elf: $(OBJS) obj/startup.o
+	@echo "\n[ELF]	Creating elf file"
+	$(MKDIR)
+	$(LD) -o $@ $^ $(LDFLAGS)
+
+bin/$(PROGRAM_NAME).bin: bin/$(PROGRAM_NAME).elf
+	@echo "\n[BIN]	Creating bin file"
+	$(OBJCOPY) -O binary bin/$(PROGRAM_NAME).elf bin/$(PROGRAM_NAME).bin
+
+clean:
+	-$(RM) obj
+	-$(RM) bin
+
+.PHONY: all clean
+
+dump:
+	$(OBJDUMP) -D bin/$(PROGRAM_NAME).elf
+
+

@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-memory_layout = { path = "../../common/memory_layout" }
+memory_layout = { path = "../memory_layout" }
