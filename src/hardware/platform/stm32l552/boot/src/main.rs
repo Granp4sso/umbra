@@ -18,7 +18,6 @@ use core::arch::global_asm;
 //use core::arch::asm;
 
 // Local Modules
-pub mod panic;
 pub mod startup;
 pub mod non_secure;
 pub mod non_secure_callable;

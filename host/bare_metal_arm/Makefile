@@ -29,7 +29,7 @@ LD_SCRIPT 	= linker/linker.ld
 # Libraries #
 #############
 
-LIB_OBJ_LIST = 
+LIB_OBJ_LIST = lib/libkernel.a
 LIB_INC_LIST =
 
 #############
@@ -42,9 +42,9 @@ LD 			= $(CC_PREFIX)ld
 OBJDUMP 	= $(CC_PREFIX)objdump
 OBJCOPY 	= $(CC_PREFIX)objcopy
 
-CFLAGS 		= -O0 -c 
+CFLAGS 		= -O0 -march=armv8-m.main -c  
 LDFLAGS 	= $(LIB_OBJ_LIST) -nostdlib -T$(LD_SCRIPT)
-LIB_DIR	= 
+LIB_DIR		= lib 
 
 ########
 # Misc #
@@ -91,5 +91,8 @@ clean:
 
 dump:
 	$(OBJDUMP) -D bin/$(PROGRAM_NAME).elf
+
+libdump:
+	$(OBJDUMP) -f $(LIB_OBJ_LIST)
 
 

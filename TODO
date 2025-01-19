@@ -1,0 +1,18 @@
+
+- Compiler: Problems with linking the liberknel.a. First, the library is quite bloated (5MB in .a and 41KB in .rlib). 
+  I am not entirely sure why this happens; must investigate further.
+  Second, host linker complains (lib/libkernel.a(kernel-5ba68cdfc44ecd58.4gqeyq6nmyf6gcvg.rcgu.o) uses VFP register arguments, bin/bare_metal_arm.elf does not).
+  This is probably happening because of different compilation flags between the rust kernel and the host C application.
+  
+- Likner: Linker script must be built hiearchically. This is required since Umbra, as a library, will be placed in a fixed memory region depending on the target platform.
+  The platform linker script will define the secure boot region and the umbra kernel region. The kernel linker script will be used by the host as well as we must
+  ensure umbra to share the same position for both the host and the secure boot. The idea is to have two separate elf, both including umbra sections. If they are
+  overlapped, it is possible to load both elf in memory and having a consistent behaviour (allowing for the host to be independent from the boot code).
+  Note that drivers are included in the secure boot elf, and not in the umbra kernel.
+
+- TOML: The config.toml should be a common file among different projects. Similarly to the linker script, a hierarchy of config.toml should exists (if doable).
+  There are multiple ways to do so, but a choice could be to have a top-level config.toml that includes a config.toml for the architecture and for the platform.
+  (including flags and compilers). architecture and platform can be passed to the settings.sh script. In addition to this, redefine CARGO envvar with settings.sh
+   
+- Currently, there is a Makefile in the boot project. It can be fine, but we need a top-level Makefile that, depending on the settings.sh configuration,
+  will build (a) the Kernel library and (b) the boot binary for the specific combination {architecture, platform}.

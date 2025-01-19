@@ -35,7 +35,7 @@
     // Define Handlers for exceptions
     .section ._host_handlers, "a"
         _host_Reset_Handler:
-            ldr sp, =_host_estack       // Load the stack pointer with the address of the top of the stack
+            //ldr sp, =_host_estack       // Load the stack pointer with the address of the top of the stack
             /* Here he need to setup the vector table base address */
             bl main                     // Call main
         
