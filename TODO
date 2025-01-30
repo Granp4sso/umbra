@@ -1,9 +1,4 @@
 
-- Compiler: Problems with linking the liberknel.a. First, the library is quite bloated (5MB in .a and 41KB in .rlib). 
-  I am not entirely sure why this happens; must investigate further.
-  Second, host linker complains (lib/libkernel.a(kernel-5ba68cdfc44ecd58.4gqeyq6nmyf6gcvg.rcgu.o) uses VFP register arguments, bin/bare_metal_arm.elf does not).
-  This is probably happening because of different compilation flags between the rust kernel and the host C application.
-  
 - Likner: Linker script must be built hiearchically. This is required since Umbra, as a library, will be placed in a fixed memory region depending on the target platform.
   The platform linker script will define the secure boot region and the umbra kernel region. The kernel linker script will be used by the host as well as we must
   ensure umbra to share the same position for both the host and the secure boot. The idea is to have two separate elf, both including umbra sections. If they are
@@ -16,3 +11,15 @@
    
 - Currently, there is a Makefile in the boot project. It can be fine, but we need a top-level Makefile that, depending on the settings.sh configuration,
   will build (a) the Kernel library and (b) the boot binary for the specific combination {architecture, platform}.
+
+- Compiler: Problems with linking the liberknel.a. First, the library is quite bloated (5MB in .a and 41KB in .rlib). 
+  I am not entirely sure why this happens; must investigate further. A key observation is that rustc backend is llvm, and can use
+  3 profiles for armv8:
+    - target.thumbv8m.base-none-eabi
+    - target.thumbv8m.main-none-eabi
+    - target.thumbv8m.main-none-eabihf
+  when compiling the host code, be sure to use the correct -march flag (e.g. -march=armv8-m.main).
+
+- Updating ENVVAR:
+    -- Compiler target
+    -- Selected Platform (therefore, linkerscript structure)

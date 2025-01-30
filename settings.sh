@@ -236,7 +236,7 @@ export OPTION_BYTES="\
 
 
 # STM32L562E    (TBD)
-# OpenTitan     (TBD)
+# Vesuvius      (TBD)
 
 echo -e "${SUCCESS}[mcu_selection] Selected $MCU${VANILLA}"
 

@@ -7,6 +7,7 @@ MEMORY
     SRAM2               (RWX)   : ORIGIN = ORIGIN(SRAM1) + LENGTH(SRAM1),                   LENGTH = 64K
 }
 
+INCLUDE /home/stefano/Desktop/Work/Projects/umbra/src/kernel/linker/umbra.ld
 
 /* Peripherals symbols */
 _host_stack_size = 0x1000;

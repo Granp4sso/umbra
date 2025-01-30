@@ -103,8 +103,7 @@ pub unsafe fn main() -> !{
     /////////////////////////////////////
     // Jump to Non-Secure World        //
     /////////////////////////////////////
-    jump_to_ns_fn();
-    // ns_fn();
+    // jump_to_ns_fn();
     
     
     loop {}
