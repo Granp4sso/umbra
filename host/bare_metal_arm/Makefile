@@ -23,7 +23,7 @@ OBJ_DIR		= obj
 INC_DIR 	= inc 
 STARTUP_DIR = src
 
-LD_SCRIPT 	= linker/linker.ld 
+LD_SCRIPT 	= linker/host.ld 
 
 #############
 # Libraries #

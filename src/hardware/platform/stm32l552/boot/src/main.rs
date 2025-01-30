@@ -19,8 +19,8 @@ use core::arch::global_asm;
 
 // Local Modules
 pub mod startup;
-pub mod non_secure;
-pub mod non_secure_callable;
+//pub mod non_secure;
+//pub mod non_secure_callable;
 
 // Crates
 use arm::sau;
@@ -110,7 +110,7 @@ pub unsafe fn main() -> !{
 
 }
 
-
+/*
 #[cfg(all(target_arch = "arm", target_os = "none"))]
 extern "C" {
     pub fn jump_to_ns_fn();
@@ -138,4 +138,4 @@ pub unsafe fn s_fn() -> !{
 
     loop {}
 
-}
+}*/

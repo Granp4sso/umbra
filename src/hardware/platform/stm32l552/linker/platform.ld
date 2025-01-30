@@ -9,16 +9,13 @@
 *
 **********************************************************************************************************/
 
-MEMORY
-{
-    SECURE_FLASH        (RXAL)  : ORIGIN = 0x08000000,                                      LENGTH = 256K,
-    NON_SECURE_FLASH    (RX)    : ORIGIN = ORIGIN(SECURE_FLASH) + LENGTH(SECURE_FLASH),     LENGTH = 256K,
-    SRAM1               (RWX)   : ORIGIN = 0x20000000,                                      LENGTH = 192K,
-    SRAM2               (RWX)   : ORIGIN = ORIGIN(SRAM1) + LENGTH(SRAM1),                   LENGTH = 64K
-}
+/* Including memory blocks definitions */
+INCLUDE /home/stefano/Desktop/Work/Projects/umbra/host/bare_metal_arm/linker/memory.ld
+
+/* Including umbra linker script */
+INCLUDE /home/stefano/Desktop/Work/Projects/umbra/src/kernel/linker/umbra.ld
 
 _umb_stack_size = 0x1000;
-_host_stack_size = 0x1000;
 
 ENTRY(_umb_vector_table);
 
@@ -42,12 +39,12 @@ SECTIONS
     ._umb_vector_table :
     {
         KEEP(*(._umb_vectors))
-    } > SECURE_FLASH
+    } > _SECURE_TEXT_MEMORY_
 
     ._umb_handlers :
     {
         KEEP(*(._umb_handlers))
-    } > SECURE_FLASH
+    } > _SECURE_TEXT_MEMORY_
 
     /* .text section in FLASH, with .start input section */
     ._umb_startup :
@@ -55,7 +52,7 @@ SECTIONS
         KEEP(*(.text._umb_start));  /* Ensure .start section is kept in .text */
         KEEP(*(.text.main));  
         
-    } > SECURE_FLASH
+    } > _SECURE_TEXT_MEMORY_
 
     /********************
     * Secure Functions  *
@@ -65,7 +62,7 @@ SECTIONS
     {
         KEEP(*(.text.secure));  
         
-    } > SECURE_FLASH
+    } > _SECURE_TEXT_MEMORY_
 
     /***********************
     * Non-Secure Callable  *
@@ -75,31 +72,31 @@ SECTIONS
     {
         *(.text*);
        
-    } > SECURE_FLASH
+    } > _SECURE_TEXT_MEMORY_
 
     .rodata :
     {
         *(.rodata*)
-    } > SECURE_FLASH
+    } > _SECURE_TEXT_MEMORY_
 
     /* Other sections (e.g., .data and .bss) can go in RAM */
     .data (NOLOAD): 
     {
         *(.data*)
-    } > SRAM2
+    } > _SECURE_DATA_MEMORY_
     
     .bss (NOLOAD): 
     {
         *(.bss*)
-    } > SRAM2
+    } > _SECURE_DATA_MEMORY_
 
     ._umb_stack (NOLOAD):
     {
         _umb_sstack = _umb_estack - _umb_stack_size;
         . = _umb_sstack;
         . += _umb_stack_size;
-        _umb_estack = ORIGIN(SRAM2) + LENGTH(SRAM2);
-    } > SRAM2
+        _umb_estack = ORIGIN(_SECURE_DATA_MEMORY_) + LENGTH(_SECURE_DATA_MEMORY_);
+    } > _SECURE_DATA_MEMORY_
 
     /****************************************************
     *      _  _             ___                         *
@@ -116,44 +113,6 @@ SECTIONS
     {
         . = ALIGN(32);
         KEEP(*(.nsc));  
-    } > SECURE_FLASH
-
-    /****************************************************
-    *      _  _            ___                          *
-    *     | \| |___ _ _   / __| ___ __ _  _ _ _ ___     *
-    *     | .` / _ \ ' \  \__ \/ -_) _| || | '_/ -_)    *
-    *     |_|\_\___/_||_| |___/\___\__|\_,_|_| \___|    *
-    *                                                   *
-    ****************************************************/
-
-    /* .ns_fn section at a fixed address within FLASH */
-    ._host_vector_table : 
-    {
-        KEEP(*(._host_vectors))
-
-    } > NON_SECURE_FLASH
-
-    ._host_host_handlers :
-    {
-        KEEP(*(._host_handlers))
-    } > NON_SECURE_FLASH
-
-    ._host_text : 
-    {
-        KEEP(*(._host_start))
-        KEEP(*(.ns))
-    } > NON_SECURE_FLASH
-
-    ._host_stack (NOLOAD):
-    {
-        _host_sstack = _host_estack - _host_stack_size;
-        . = _host_sstack;
-        . += _host_stack_size;
-        _host_estack = ORIGIN(SRAM1) + LENGTH(SRAM1);
-    } > SRAM1
-
-
+    } > _SECURE_TEXT_MEMORY_
 
 }
-
-

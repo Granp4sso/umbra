@@ -6,6 +6,7 @@
 *
 **********************************************************************************************************/
 
+
 _umb_stack_size = 0x1000;
 
 SECTIONS
@@ -29,5 +30,5 @@ SECTIONS
         KEEP(*(.text.umbra_test_0))
         KEEP(*(.text.umbra_test_1))
         KEEP(*(.text.umbra_test_2))
-    } > SECURE_FLASH
+    } > _SECURE_TEXT_MEMORY_
 }
