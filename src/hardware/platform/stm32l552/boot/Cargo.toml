@@ -3,6 +3,11 @@ name = "boot"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "boot"
+path = "src/lib.rs"
+crate-type = ["staticlib"]
+
 [dependencies]
 arm = { path = "../../../architecture/arm" }
 drivers = { path = "../drivers" }
@@ -12,3 +17,9 @@ kernel = { path = "../../../../kernel"}
 codegen-units = 1 # better optimizations
 debug = true # symbols are nice and they don't increase the size on Flash
 lto = true # better optimizations
+panic = "abort"
+
+
+[profile.dev]
+panic = "abort"
+

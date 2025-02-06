@@ -70,7 +70,7 @@ global_asm!(
     // .type _start, %function
     
     _umb_start:
-        bl main                         // Branch to main
+        bl boot                         // Branch to main
 
     "
 );

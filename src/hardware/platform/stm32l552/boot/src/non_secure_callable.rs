@@ -11,11 +11,12 @@ global_asm!(
     "
     .section .nsc, \"a\"
     .global nsc_fn
-    .extern s_fn         
+    #.extern s_fn         
 
     nsc_fn:
         sg
-        bl s_fn
+        #bl s_fn
+        bl nsc_fn
 
     "
 );
