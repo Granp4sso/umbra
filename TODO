@@ -11,6 +11,8 @@
 
   Also, we need to include envvar in linker script
 
+  NB: Major refactoring will be required
+
 - Library: Currently, the host code is using a static library .a, but the platform binary needs to use .rlib. I need to understand how 
   to make platform to use .a as well. Symbols will be included in the .a anyway, therefore this will not change the linking process.
 

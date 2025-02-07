@@ -29,7 +29,7 @@ LD_SCRIPT 	= linker/host.ld
 # Libraries #
 #############
 
-LIB_OBJ_LIST = lib/libboot.a
+LIB_OBJ_LIST = lib/libkernel.a
 LIB_INC_LIST =
 
 #############
@@ -42,7 +42,7 @@ LD 			= $(CC_PREFIX)ld
 OBJDUMP 	= $(CC_PREFIX)objdump
 OBJCOPY 	= $(CC_PREFIX)objcopy
 
-CFLAGS 		= -O0 -march=armv8-m.main -c  
+CFLAGS 		= -O0 -march=armv8-m.main -g -c  
 LDFLAGS 	= $(LIB_OBJ_LIST) -nostdlib -T$(LD_SCRIPT)
 LIB_DIR		= lib 
 
@@ -55,6 +55,8 @@ OBJS 	= $(addprefix $(OBJ_DIR)/, $(notdir $(SRCS:.c=.o)))
 
 RM      = rm -rf 					# Remove recursively command
 MKDIR   = @mkdir -p $(@D) 			# Creates folders if not present
+
+ENTRY_POINY ?= main
 
 ###############################################################################
 
@@ -82,6 +84,17 @@ bin/$(PROGRAM_NAME).elf: $(OBJS) obj/startup.o
 bin/$(PROGRAM_NAME).bin: bin/$(PROGRAM_NAME).elf
 	@echo "\n[BIN]	Creating bin file"
 	$(OBJCOPY) -O binary bin/$(PROGRAM_NAME).elf bin/$(PROGRAM_NAME).bin
+
+
+debug: 
+	$(GDB) bin/$(PROGRAM_NAME).elf
+	
+program_elf: 
+	$(GDB) bin/$(PROGRAM_NAME).elf \
+	-ex 'target extended-remote:3333' \
+	-ex 'load bin/$(PROGRAM_NAME).elf' \
+	-ex 'b ${ENTRY_POINY}' \
+	-ex 'r' \
 
 clean:
 	-$(RM) obj

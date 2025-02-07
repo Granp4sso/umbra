@@ -18,6 +18,8 @@ MEMORY
     SRAM_1               (RWX)   : ORIGIN = ORIGIN(SRAM_0) + LENGTH(SRAM_0),                 LENGTH = 64K
 }
 
+_host_entry_point = 0x08040040;
+
 /**********************************
 *   Umbra Memory Block Aliases    *
 ***********************************/
@@ -31,6 +33,7 @@ MEMORY
         - _NSC_TEXT_MEMORY_
         - _NSC_DATA_MEMORY_
 */
+
 
 MEMORY
 {

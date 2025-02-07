@@ -20,4 +20,6 @@
 #![crate_type = "rlib"]
 #![no_std]
 
+pub mod startup;
 pub mod sau;
+
