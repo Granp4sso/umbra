@@ -5,9 +5,7 @@
 
 pub mod common;
 pub mod memory_protection_server;
-pub mod user_api;
+pub mod umbra_nsc_api;
 pub mod panic;
 
-pub use crate::user_api::umbra_test_0;
-pub use crate::user_api::umbra_test_1;
-pub use crate::user_api::umbra_test_2;
+pub use crate::umbra_nsc_api::umbra_enclave_run;

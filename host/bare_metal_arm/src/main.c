@@ -1,11 +1,10 @@
 
-extern void umbra_test_0();
-//extern void boot();
+extern void umbra_enclave_run();
 
 int main(){
 
-    //boot();
-    //umbra_test_0();
+
+    umbra_enclave_run();
     while(1);
 
     return 0;

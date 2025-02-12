@@ -21,13 +21,6 @@ _umb_estack = ORIGIN(_SECURE_KERNEL_DATA_MEMORY_) + LENGTH(_SECURE_KERNEL_DATA_M
 /* Define the sections */
 SECTIONS
 {
-    /************************************
-    *      ___                          *
-    *     / __| ___ __ _  _ _ _ ___     *
-    *     \__ \/ -_) _| || | '_/ -_)    *
-    *     |___/\___\__|\_,_|_| \___|    *
-    *                                   *
-    ************************************/
 
     /********************
     * Secure Boot Area  *

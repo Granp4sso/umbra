@@ -20,11 +20,9 @@ SECTIONS
     * Kernel Area  *
     ****************/
 
-    ._umb_test :
+    .umbra_api_implementation :
     {
-        KEEP(*(.text.umbra_test_0))
-        KEEP(*(.text.umbra_test_1))
-        KEEP(*(.text.umbra_test_2))
+        KEEP(*(.text.umbra_enclave_run_imp))
     } > _SECURE_KERNEL_TEXT_MEMORY_
 
     /****************************************************
@@ -38,9 +36,9 @@ SECTIONS
     *                                                   *
     ****************************************************/
 
-    .nsc : 
+    .umbra_nsc_api : 
     {
         . = ALIGN(32);
-        KEEP(*(.nsc));  
+        KEEP(*(.umbra_nsc_api));  
     } > _NSC_TEXT_MEMORY_
 }
