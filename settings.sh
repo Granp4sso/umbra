@@ -74,6 +74,7 @@ done
 #################################################################
 
 # Currently, only STM32L552ZETXQ is supported (and only programming through ST-link)
+# In the future, als STM32L562 will be supported, and possibly RISC-V platforms
 
 MCU_CONFIG=$1
 
@@ -83,6 +84,9 @@ echo -e "${BOLD}Selecting target microcontroller${VANILLA}"
 # STM32L552ZETXQ #
 ##################
 
+# This all section shall be enlarged in the future, when support for other boards
+# will be added
+
 # Security notes are required.
 # The security infrastructure for memory and peripheral is quite rich in st32 MCUs.
 # In terms of memory the CPU is protected by the IDAU and the SAU.
@@ -91,9 +95,10 @@ echo -e "${BOLD}Selecting target microcontroller${VANILLA}"
 # override CPU memory view. A boot code must enforce the correct memory view
 # by configuring all the secure memory controller hierarchy. 
 
-export MCU=STM32L552ZETXQ
+export MCU=stm32l552
 export OPENOCD_CONFIG=/usr/local/share/openocd/scripts/board/st_nucleo_l5.cfg
-export TARAGET_FLASH_START=0x0C000000
+export TARGET_FLASH_START=0x0C000000
+export TARGET_ARCH=thumbv8m.main-none-eabi
 
 # ST-LINK command line interface (CLI):
 # (https://www.st.com/resource/en/user_manual/um2237-stm32cubeprogrammer-software-description-stmicroelectronics.pdf)
@@ -238,7 +243,8 @@ export OPTION_BYTES="\
 # STM32L562E    (TBD)
 # Vesuvius      (TBD)
 
-echo -e "${SUCCESS}[mcu_selection] Selected $MCU${VANILLA}"
+echo -e "${SUCCESS}[mcu_selection]  Selected $MCU${VANILLA}"
+echo -e "${SUCCESS}[arch_selection] Selected $TARGET_ARCH${VANILLA}"
 
 #############################
 #    ___      _   _         #
@@ -250,12 +256,25 @@ echo -e "${SUCCESS}[mcu_selection] Selected $MCU${VANILLA}"
 
 echo -e "${BOLD}Configuring paths${VANILLA}"
 
+# Configure platform target
 export ROOT_DIR=$( dirname $( realpath $BASH_SOURCE[0]} ) )
-export LD_SCRIPT_DIR=${ROOT_DIR}/linker
+
+export HW_DIR=${ROOT_DIR}/src/hardware
+export KERNEL_DIR=${ROOT_DIR}/src/kernel
+
+export PLATFORM_DIR=${HW_DIR}/platform/${MCU}
+export DRIVER_DIR=${PLATFORM_DIR}/driver
+export SECBOOT_DIR=${PLATFORM_DIR}/boot
+export PLATFORM_LD_DIR=${PLATFORM_DIR}/linker
 
 PATHS=(
-    ${ROOT_DIR} 
-    ${LD_SCRIPT_DIR}
+    ${ROOT_DIR} \
+    ${HW_DIR} \
+    ${PLATFORM_DIR} \
+    ${DRIVER_DIR} \
+    ${SECBOOT_DIR} \
+    ${PLATFORM_LD_DIR} \
+    ${KERNEL_DIR} \
 )
 
 for path in "${PATHS[@]}"; do
