@@ -6,60 +6,86 @@
 #	it builds the secure boot ELF, but it does not support host building. Instead it is expecting
 #	the host ELF path. You can program the target board, and debug it
 
-CARGO_PATH_OPT = -Z unstable-options -C ${SECBOOT_DIR}
-# either release or debug (next build in both release and debug mode)
-BIN_MODE = release
-BIN_PATH = ${SECBOOT_DIR}/target/${TARGET_ARCH}/${BIN_MODE}
-BIN_NAME = boot
+########
+# Misc #
+########
 
-#########################################
-#    _____                  _      		#
-#   |_   _|_ _ _ _ __ _ ___| |_ ___		#
-#     | |/ _` | '_/ _` / -_)  _(_-<		#
-#     |_|\__,_|_| \__, \___|\__/__/		#
-#                 |___/            		#
-#########################################
+CARGO_PATH_OPT = -Z unstable-options -C
 
-###########################
-# Secure Boot bin targets #
-###########################
+#####################################################
+#    ___                        ___           _   	#
+#   / __| ___ __ _  _ _ _ ___  | _ ) ___  ___| |_ 	#
+#   \__ \/ -_) _| || | '_/ -_) | _ \/ _ \/ _ \  _|	#
+#   |___/\___\__|\_,_|_| \___| |___/\___/\___/\__|	#
+#                                                 	#
+#####################################################
 
-check: 
-	@${CARGO} ${CARGO_PATH_OPT} check 
+# debug or release
+BOOT_COMPILE_MODE = release
+BOOT_ELF_MODE = $(if $(filter debug,$(BOOT_COMPILE_MODE)),, --release)
+BOOT_ELF_PATH = ${SECBOOT_DIR}/target/${TARGET_ARCH}/${BOOT_COMPILE_MODE}
+BOOT_ELF_NAME = boot
 
-build:
-	@${CARGO} ${CARGO_PATH_OPT} build --${BIN_MODE}
+#########
+# Build #
+#########
+
+secureboot_check: 
+	@${CARGO} ${CARGO_PATH_OPT} ${SECBOOT_DIR} check 
+
+secureboot_build:
+	@${CARGO} ${CARGO_PATH_OPT} ${SECBOOT_DIR} build ${BOOT_ELF_MODE}
  
-bin: 
-	@$(OBJCOPY) -O binary $(BIN_PATH)/$(BIN_NAME) $(BINPATH)/$(BIN_NAME).bin
+secureboot_bin: 
+	@$(OBJCOPY) -O binary $(BOOT_ELF_PATH)/$(BOOT_ELF_NAME) $(BINPATH)/$(BOOT_ELF_NAME).bin
 	
-clean:
-	@${CARGO} ${CARGO_PATH_OPT} clean 
+secureboot_clean:
+	@${CARGO} ${CARGO_PATH_OPT} ${SECBOOT_DIR} clean 
 
 #############
 # Dump Code #
 #############
 
-objdump:
-	@$(OBJDUMP) -D $(BIN_PATH)/$(BIN_NAME)
+secureboot_objdump:
+	@$(OBJDUMP) -D $(BOOT_ELF_PATH)/$(BOOT_ELF_NAME)
 
-elfdump:
-	@readelf -S $(BIN_PATH)/$(BIN_NAME)
+secureboot_elfdump:
+	@readelf -S $(BOOT_ELF_PATH)/$(BOOT_ELF_NAME)
 
-hexdump:
-	@hexdump -C $(BIN_PATH)/$(BIN_NAME).bin
+secureboot_hexdump:
+	@hexdump -C $(BOOT_ELF_PATH)/$(BOOT_ELF_NAME).bin
 
-cargodump:
-	@${CARGO} ${CARGO_PATH_OPT} objdump --bin $(BIN_NAME) -- -d --no-show-raw-insn
+secureboot_cargodump:
+	@${CARGO} ${CARGO_PATH_OPT} ${SECBOOT_DIR} objdump --bin $(BOOT_ELF_NAME) -- -d --no-show-raw-insn
 
-##########################
-# Umbra library creation #
-##########################
-# TBD: Build umbra library and export the umbralib.a path
+#####################################
+#    _   _       _             		#
+#   | | | |_ __ | |__ _ _ __ _ 		#
+#   | |_| | '  \| '_ \ '_/ _` |		#
+#    \___/|_|_|_|_.__/_| \__,_|		#
+#                              		#
+#####################################
 
-##################
-# Program Device #
-##################
+# debug or release
+UMBRA_COMPILE_MODE = debug
+UMBRA_LIB_MODE = $(if $(filter debug,$(UMBRA_COMPILE_MODE)),, --release)
+UMBRA_LIB_PATH = ${KERNEL_DIR}/target/${TARGET_ARCH}/${UMBRA_COMPILE_MODE}
+
+umbra_build:
+	@${CARGO} ${CARGO_PATH_OPT} ${KERNEL_DIR} rustc ${UMBRA_LIB_MODE} --crate-type=staticlib 
+	@cp ${UMBRA_LIB_PATH}/libkernel.a ${LIB_DIR}/libumbra.a
+
+umbra_clean:
+	@${CARGO} ${CARGO_PATH_OPT} ${KERNEL_DIR} clean;
+	@rm -f lib/*
+
+#################################################################
+#    ___                                ___          _        	#
+#   | _ \_ _ ___  __ _ _ _ __ _ _ __   |   \ _____ _(_)__ ___ 	#
+#   |  _/ '_/ _ \/ _` | '_/ _` | '  \  | |) / -_) V / / _/ -_)	#
+#   |_| |_| \___/\__, |_| \__,_|_|_|_| |___/\___|\_/|_\__\___|	#
+#                |___/                                        	#
+#################################################################
 
 # Configure the target system security features
 # Uses the flasher for stm32
@@ -67,27 +93,51 @@ enable_security:
 	${FLASHER} ${CONNECT} ${SECURE_ENABLE};
 	${FLASHER} ${CONNECT} ${OPTION_BYTES}
 
-# Open the backend (openocd)
+# Open the backend (fixed to openocd)
 openocd:
 	${OPENOCD} -f ${OPENOCD_CONFIG}
 
-
-# TBD: 
-# program_elf:
-#	1 - load the secure boot ELF -> program_boot_elf:
-#	2 - load the host ELF (that includes the umbralib.a) -> program_host_elf:
-
-# Program the system using GDB (i.e. the ELF file)
+# Program the secure boot first and the host then
 # A backend (such as openocd) must be opened before doing this
-program_boot_elf_stay: 
-	$(GDB) $(BIN_PATH)/$(BIN_NAME) \
+program_elf: program_elf_boot program_elf_host
+
+program_elf_boot:
+	$(GDB) $(BOOT_ELF_PATH)/$(BOOT_ELF_NAME) \
+	-ex 'target extended-remote:3333' \
+	-ex 'load $(BOOT_ELF_PATH)/$(BOOT_ELF_NAME)' \
+	-ex 'set confirm off' \
+	-ex 'q'
+
+program_elf_host:
+	$(GDB) $(HOST_ELF) \
+	-ex 'target extended-remote:3333' \
+	-ex 'b main' \
+	-ex 'set confirm off' \
+	-ex 'r' \
+	-ex 'load $(HOST_ELF)' \
+	-ex 'r' \
+	-ex 'set confirm on'
+
+##############
+# Deprecated #
+##############
+
+# Program the secure boot and just debug it
+program_elf_boot_stay: 
+	$(GDB) $(BOOT_ELF_PATH)/$(BOOT_ELF_NAME) \
 	-ex 'target extended-remote:3333' \
 	-ex 'b secure_boot' \
 	-ex 'set confirm off' \
 	-ex 'r' \
-	-ex 'load $(BIN_PATH)/$(BIN_NAME)' \
+	-ex 'load $(BOOT_ELF_PATH)/$(BOOT_ELF_NAME)' \
 	-ex 'r' \
 	-ex 'set confirm on'
+
+# Program the system using the flasher (i.e. the flat binary)
+# We expect the user to use GDB as a loader, but it is possible to
+# load flat binaries using the platform flasher (if any)
+program_target: enable_security
+	${FLASHER} ${CONNECT} ${LOAD} $(BOOT_ELF_PATH)/$(BOOT_ELF_NAME).bin ${TARGET_FLASH_START}
 
 #########
 # PHONY #

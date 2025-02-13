@@ -61,6 +61,7 @@ for dep in "${DEPENDENCIES[@]}"; do
         echo -e "${SUCCESS}[dependencies_check] Found $dep_bin at $dep_path${VANILLA}"
     fi
 done
+echo -e ""
 
 #################################################################
 #    __  __ _                        _           _ _            #
@@ -245,6 +246,7 @@ export OPTION_BYTES="\
 
 echo -e "${SUCCESS}[mcu_selection]  Selected $MCU${VANILLA}"
 echo -e "${SUCCESS}[arch_selection] Selected $TARGET_ARCH${VANILLA}"
+echo -e ""
 
 #############################
 #    ___      _   _         #
@@ -258,7 +260,7 @@ echo -e "${BOLD}Configuring paths${VANILLA}"
 
 # Configure platform target
 export ROOT_DIR=$( dirname $( realpath $BASH_SOURCE[0]} ) )
-
+export LIB_DIR=${ROOT_DIR}/lib
 export HW_DIR=${ROOT_DIR}/src/hardware
 export KERNEL_DIR=${ROOT_DIR}/src/kernel
 
@@ -269,6 +271,7 @@ export PLATFORM_LD_DIR=${PLATFORM_DIR}/linker
 
 PATHS=(
     ${ROOT_DIR} \
+    ${LIB_DIR} \
     ${HW_DIR} \
     ${PLATFORM_DIR} \
     ${DRIVER_DIR} \
@@ -280,5 +283,20 @@ PATHS=(
 for path in "${PATHS[@]}"; do
     echo -e "${SUCCESS}[path_configuration] $path${VANILLA}"
 done
+echo -e ""
 
+#########################
+#    _  _        _      #
+#   | || |___ __| |_    #
+#   | __ / _ (_-<  _|   #
+#   |_||_\___/__/\__|   #
+#                       #
+#########################
 
+echo -e "${BOLD}Configuring Host information${VANILLA}"
+
+# This should be a possible parameter in the future
+export HOST_ELF=${ROOT_DIR}/host/bare_metal_arm/bin/bare_metal_arm.elf
+
+echo -e "${SUCCESS}[host_configuration] host elf is @ $HOST_ELF${VANILLA}"
+echo -e ""

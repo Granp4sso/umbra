@@ -12,7 +12,7 @@
 INCLUDE /home/stefano/Desktop/Work/Projects/umbra/host/bare_metal_arm/linker/memory.ld
 
 /* Including umbra linker script */
-INCLUDE /home/stefano/Desktop/Work/Projects/umbra/src/kernel/linker/umbra.ld
+INCLUDE /home/stefano/Desktop/Work/Projects/umbra/linker/umbra.ld
 
 /*******************
 *   Host Sections  *

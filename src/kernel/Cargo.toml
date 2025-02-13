@@ -5,9 +5,9 @@ edition = "2021"
 
 [dependencies]
 
-#[lib]
-#name = "kernel"
-#path = "src/lib.rs"
+[lib]
+name = "kernel"
+path = "src/lib.rs"
 #crate-type = ["staticlib"]
 
 [profile.dev]

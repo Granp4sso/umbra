@@ -29,7 +29,7 @@ LD_SCRIPT 	= linker/host.ld
 # Libraries #
 #############
 
-LIB_OBJ_LIST = lib/libkernel.a
+LIB_OBJ_LIST = lib/libumbra.a
 LIB_INC_LIST =
 
 #############
