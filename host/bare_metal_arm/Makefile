@@ -20,6 +20,7 @@ PROGRAM_NAME = $(shell basename $(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 
 SRC_DIR		= src
 OBJ_DIR		= obj
+APP_DIR		= app
 INC_DIR 	= inc 
 STARTUP_DIR = src
 
@@ -42,7 +43,7 @@ LD 			= $(CC_PREFIX)ld
 OBJDUMP 	= $(CC_PREFIX)objdump
 OBJCOPY 	= $(CC_PREFIX)objcopy
 
-CFLAGS 		= -O0 -march=armv8-m.main -g -c  
+CFLAGS 		= -O0 -march=armv8-m.main -g -c
 LDFLAGS 	= $(LIB_OBJ_LIST) -nostdlib -T$(LD_SCRIPT)
 LIB_DIR		= lib 
 
@@ -50,7 +51,7 @@ LIB_DIR		= lib
 # Misc #
 ########
 
-SRCS 	= $(wildcard src/*.c) $(wildcard lib/*.c)
+SRCS 	= $(wildcard src/*.c) $(wildcard app/*.c)
 OBJS 	= $(addprefix $(OBJ_DIR)/, $(notdir $(SRCS:.c=.o)))
 
 RM      = rm -rf 					# Remove recursively command
@@ -66,8 +67,16 @@ ENTRY_POINY ?= main
 
 all: bin/$(PROGRAM_NAME).bin
 
+tst:
+	@echo ${OBJS}
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo "\n[OBJ]	Creating OBJs from src"
+	$(MKDIR)
+	$(CC) -o $@ $^ -I$(INC_DIR) $(LIB_INC_LIST) $(CFLAGS)
+
+$(OBJ_DIR)/%.o: $(APP_DIR)/%.c
+	@echo "\n[OBJ]	Creating OBJs from app"
 	$(MKDIR)
 	$(CC) -o $@ $^ -I$(INC_DIR) $(LIB_INC_LIST) $(CFLAGS)
 

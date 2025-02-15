@@ -61,7 +61,7 @@ pub unsafe fn secure_boot() -> !{
     // CONFIGURE NON-SECURE CODE - SAU //
     /////////////////////////////////////
 
-    let mut memory_block_list = MemoryBlockList::create_from_range(0x08040000,0x08060000);
+    let mut memory_block_list = MemoryBlockList::create_from_range(0x08040000,0x08080000);
     memory_block_list.set_memory_block_security(MemoryBlockSecurityAttribute::Untrusted);
     sau_driver.memory_security_guard_create(&memory_block_list);
 
