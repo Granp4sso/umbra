@@ -29,6 +29,7 @@ SECTIONS
 {
     ._host_vector_table : 
     {
+        . += 0x20;
         KEEP(*(._host_vectors))
 
     } > FLASH_BANK_1

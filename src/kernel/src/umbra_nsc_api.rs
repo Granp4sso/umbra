@@ -43,8 +43,8 @@ global_asm!(
 #[no_mangle]
 pub fn umbra_enclave_run_imp(){
 
-    let x = 128;
-    let _y = x + 12;
+    /*let x = 128;
+    let _y = x + 12;*/
 
     loop {}
 }
