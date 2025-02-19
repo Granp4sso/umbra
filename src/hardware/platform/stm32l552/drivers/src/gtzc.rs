@@ -178,7 +178,12 @@ impl GtzcDriver {
 impl MemorySecurityGuardTrait for GtzcDriver {
 
     fn memory_security_guard_init(&mut self) {
-        // Currently there is no initialization required for GTZC
+        // Let's enable secure reads/writes to non-secure pages
+        let regs_base_address = self.regs as *const GtzcRegisters as *const u32;
+        unsafe {
+            write_register(regs_base_address, 0x800, 0x80000000);
+            write_register(regs_base_address, 0xC00, 0x80000000);
+        }
     }
 
     fn memory_security_guard_create(&mut self, memory_block_list: & MemoryBlockList) {

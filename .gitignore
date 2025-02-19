@@ -22,3 +22,7 @@ src/*/*/*/*/target/*
 
 # Ignore deprecated
 deprecated
+
+# Ignore tmp files and topo
+tmp
+todo

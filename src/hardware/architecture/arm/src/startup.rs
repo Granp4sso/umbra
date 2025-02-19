@@ -73,6 +73,12 @@ global_asm!(
     // .type _start, %function
     
     _umb_start:
+        //ldr r0, =0x20000000   // Load address 0x2000F000 into r0
+        //ldr r1, =0xFFFFF000   // Load value 0xFFFFFFFF into r1
+        //str r1, [r0]          // Store the value in memory at the address in r0
+        //ldr r1, [r0]
+        //ldr r0, =0x08045000   // Load address 0x2000F000 into r0
+        //str r1, [r0]
         bl secure_boot                    // Branch to main
 
     "

@@ -93,6 +93,9 @@ enable_security:
 	${FLASHER} ${CONNECT} ${SECURE_ENABLE};
 	${FLASHER} ${CONNECT} ${OPTION_BYTES}
 
+erase_all:
+	${FLASHER} ${CONNECT} --erase all
+
 # Open the backend (fixed to openocd)
 openocd:
 	${OPENOCD} -f ${OPENOCD_CONFIG}
