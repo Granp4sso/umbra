@@ -61,8 +61,8 @@ type GtzcRegisters = u32;
 // Block-based Memory Protection Controller //
 //////////////////////////////////////////////
 
-const GTZC_MPCBB1_BASE_ADDR : u32 = GTZC_BASE_ADDR + 0x800;
-const GTZC_MPCBB2_BASE_ADDR : u32 = GTZC_BASE_ADDR + 0xC00;
+const GTZC_MPCBB1_BASE_OFFSET : u32 = 0x800;
+const GTZC_MPCBB2_BASE_OFFSET : u32 = 0xC00;
 
 // Memory Protection Controller 1/2 - Control Register
 const _GTZC_MPCBB_CR_REG                 : u32 = 0x000;
@@ -131,9 +131,9 @@ impl GtzcDriver {
         let mut block_reg_offset = GTZC_MPCBB_VCTR_Y_REG + (super_block_id as u32)*4;
 
         if memory_bank_id == 0 {
-            block_reg_offset += GTZC_MPCBB1_BASE_ADDR;
+            block_reg_offset += GTZC_MPCBB1_BASE_OFFSET;
         } else {
-            block_reg_offset += GTZC_MPCBB2_BASE_ADDR;
+            block_reg_offset += GTZC_MPCBB2_BASE_OFFSET;
         }
 
         let secure_data = if secure_flag == 0 {0x00000000} else {0xffffffff};
@@ -149,9 +149,9 @@ impl GtzcDriver {
         let mut block_reg_offset = GTZC_MPCBB_VCTR_Y_REG + (super_block_id as u32)*4;
 
         if memory_bank_id == 0 {
-            block_reg_offset += GTZC_MPCBB1_BASE_ADDR;
+            block_reg_offset += GTZC_MPCBB1_BASE_OFFSET;
         } else {
-            block_reg_offset += GTZC_MPCBB2_BASE_ADDR;
+            block_reg_offset += GTZC_MPCBB2_BASE_OFFSET;
         }
 
         let block_bitmask = 1 << block_id;

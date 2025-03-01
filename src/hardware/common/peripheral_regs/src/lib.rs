@@ -57,7 +57,7 @@ pub unsafe fn set_register_field(regs_base_address: *const u32, reg_offset: u32,
     let field_size = val >> 8;
     let field_start = val & 0x00ff;
 
-    for field_cnt in 0..field_size {
+    for field_cnt in 0..field_size+1 {
         if ((mask >> field_cnt) & 0x1) == 1 {
             let curr_bit = (field_start + field_cnt) as u8;
             set_register_bit(regs_base_address, reg_offset, curr_bit);
@@ -70,7 +70,7 @@ pub unsafe fn clear_register_field(regs_base_address: *const u32, reg_offset: u3
     let field_size = val >> 8;
     let field_start = val & 0x00ff;
 
-    for field_cnt in 0..field_size {
+    for field_cnt in 0..field_size+1 {
         if ((mask >> field_cnt) & 0x1) == 1 {
             let curr_bit = (field_start + field_cnt) as u8;
             clear_register_bit(regs_base_address, reg_offset, curr_bit);

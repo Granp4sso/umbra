@@ -19,7 +19,7 @@ INCLUDE /home/stefano/Desktop/Work/Projects/umbra/linker/umbra.ld
 ********************/
 
 _host_stack_size = 0x1000;
-_host_estack = ORIGIN(SRAM_0) + LENGTH(SRAM_0) - 0x100;
+_host_estack = ORIGIN(SRAM_0) + LENGTH(SRAM_0) - 0x4;
 _host_sstack = _host_estack - _host_stack_size;
 
 _host_app_address = ORIGIN(FLASH_BANK_1) + LENGTH(FLASH_BANK_1) - 0x8000;
@@ -34,7 +34,7 @@ SECTIONS
 
     } > FLASH_BANK_1
 
-    ._host_handlers :
+    ._host_handlers _host_entry_point :
     {
         KEEP(*(._host_handlers))
     } > FLASH_BANK_1

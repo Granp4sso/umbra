@@ -67,9 +67,6 @@ ENTRY_POINY ?= main
 
 all: bin/$(PROGRAM_NAME).bin
 
-tst:
-	@echo ${OBJS}
-
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo "\n[OBJ]	Creating OBJs from src"
 	$(MKDIR)

@@ -61,7 +61,7 @@ pub unsafe fn secure_boot() -> !{
     // CONFIGURE NON-SECURE CODE - SAU //
     /////////////////////////////////////
 
-    let mut memory_block_list = MemoryBlockList::create_from_range(0x08040000,0x08060000);
+    let mut memory_block_list = MemoryBlockList::create_from_range(0x08040000,0x08080000);
     memory_block_list.set_memory_block_security(MemoryBlockSecurityAttribute::Untrusted);
     sau_driver.memory_security_guard_create(&memory_block_list);
 
@@ -92,7 +92,6 @@ pub unsafe fn secure_boot() -> !{
     memory_block_list.set_memory_block_security(MemoryBlockSecurityAttribute::Untrusted);
     gtzc_driver.memory_security_guard_create(&memory_block_list);
 
-
     ///////////////////////////////////
     // CONFIGURE NON-SECURE CALLABLE //
     ///////////////////////////////////
@@ -105,11 +104,6 @@ pub unsafe fn secure_boot() -> !{
     /////////////////////////////////////
     // Jump to Non-Secure World        //
     /////////////////////////////////////
-
-    unsafe {
-        let addr: *mut u32 = 0x20000000 as *mut u32;
-        *addr = 0xffff0000;
-    }
 
     trampoline_to_ns();
     
