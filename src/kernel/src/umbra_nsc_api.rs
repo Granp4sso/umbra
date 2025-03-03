@@ -8,6 +8,9 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 use core::arch::global_asm;
+use super::memory_protection_server::memory_guard::MemorySecurityGuardTrait;
+use super::common::memory_layout::MemoryBlockList;
+use super::common::memory_layout::MemoryBlockSecurityAttribute;
 
 global_asm!(
     "
@@ -17,17 +20,17 @@ global_asm!(
 
 #[cfg(all(target_arch = "arm", target_os = "none"))]
 extern "C" {
-    pub fn umbra_enclave_run();
+    pub fn umbra_tee_create();
 }
 #[cfg(all(target_arch = "arm", target_os = "none"))]
 global_asm!(
     "
-    .global umbra_enclave_run 
-    .extern umbra_enclave_run_imp    
+    .global umbra_tee_create 
+    .extern umbra_tee_create_imp    
 
-    umbra_enclave_run:
+    umbra_tee_create:
         sg
-        bl umbra_enclave_run_imp
+        bl umbra_tee_create_imp
 
     "
 );
@@ -41,10 +44,20 @@ global_asm!(
 );
 
 #[no_mangle]
-pub fn umbra_enclave_run_imp(){
+pub fn umbra_tee_create_imp(){
 
-    /*let x = 128;
-    let _y = x + 12;*/
+    // Let's assume a fixed address, 0x20000000
+    // This region must be defined as secure
+    let mut base_addr: u32 = 0x20000000;
+    let size: u32 = 0x100;
+
+    // Define secure memory regions
+    base_addr = base_addr + size;
+
+
+    // Copy the binary 
+
+    
 
     loop {}
 }
